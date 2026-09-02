@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="FileShort - free online tools to compress and manage PDF and image files.">
+  <title>FileShort — Make your files smaller</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/">File<span>Short</span></a>
+    <nav>
+      <a href="#tools">Tools</a>
+      <a href="#about">About</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="badge">FREE FILE TOOLS</div>
+      <h1>Make your files <span>smaller.</span></h1>
+      <p>Compress images and PDFs quickly in your browser. No account required.</p>
+      <div class="hero-actions">
+        <a class="btn primary" href="#image-compressor">Compress Image</a>
+        <a class="btn secondary" href="#pdf-compressor">Compress PDF</a>
+      </div>
+    </section>
+
+    <section id="tools" class="tools">
+      <h2>Popular tools</h2>
+      <div class="tool-grid">
+        <a class="tool-card active-card" href="#image-compressor">
+          <div class="icon">🖼️</div>
+          <h3>Compress Image</h3>
+          <p>Reduce JPG, PNG and WebP size with a target quality.</p>
+          <span>Try it →</span>
+        </a>
+        <a class="tool-card" href="#pdf-compressor">
+          <div class="icon">📄</div>
+          <h3>Compress PDF</h3>
+          <p>Browser-based PDF optimization. Beta version.</p>
+          <span>Try it →</span>
+        </a>
+        <div class="tool-card coming">
+          <div class="icon">📑</div>
+          <h3>JPG → PDF</h3>
+          <p>Convert images into a PDF.</p>
+          <span>Coming next</span>
+        </div>
+        <div class="tool-card coming">
+          <div class="icon">✂️</div>
+          <h3>Split PDF</h3>
+          <p>Split a PDF into separate files.</p>
+          <span>Coming next</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="image-compressor" class="workspace">
+      <div class="section-title">
+        <span class="step">01</span>
+        <div><h2>Compress Image</h2><p>Everything happens in your browser.</p></div>
+      </div>
+      <label class="dropzone" id="imageDrop">
+        <input id="imageInput" type="file" accept="image/jpeg,image/png,image/webp">
+        <div class="upload-icon">↑</div>
+        <strong>Choose an image</strong>
+        <span>JPG, PNG or WebP</span>
+      </label>
+
+      <div id="imageControls" class="controls hidden">
+        <div class="file-row">
+          <div><strong id="imageName"></strong><small id="imageOriginal"></small></div>
+          <button class="text-btn" id="imageReset">Change</button>
+        </div>
+        <label>Quality <output id="qualityValue">70%</output>
+          <input id="quality" type="range" min="10" max="95" value="70">
+        </label>
+        <label>Output format
+          <select id="imageFormat">
+            <option value="image/jpeg">JPG</option>
+            <option value="image/webp">WebP</option>
+          </select>
+        </label>
+        <button class="btn primary full" id="compressImage">Compress image</button>
+        <div id="imageResult" class="result hidden"></div>
+      </div>
+    </section>
+
+    <section id="pdf-compressor" class="workspace">
+      <div class="section-title">
+        <span class="step">02</span>
+        <div><h2>Compress PDF <em>Beta</em></h2><p>Basic browser-side optimization.</p></div>
+      </div>
+      <label class="dropzone" id="pdfDrop">
+        <input id="pdfInput" type="file" accept="application/pdf">
+        <div class="upload-icon">↑</div>
+        <strong>Choose a PDF</strong>
+        <span>PDF files only</span>
+      </label>
+      <div id="pdfControls" class="controls hidden">
+        <div class="file-row">
+          <div><strong id="pdfName"></strong><small id="pdfOriginal"></small></div>
+          <button class="text-btn" id="pdfReset">Change</button>
+        </div>
+        <button class="btn primary full" id="compressPdf">Optimize PDF</button>
+        <div id="pdfResult" class="result hidden"></div>
+        <p class="note">PDF compression is in beta. Some PDFs may become only slightly smaller because the original file may already be optimized.</p>
+      </div>
+    </section>
+
+    <section id="about" class="privacy">
+      <h2>Your files stay on your device</h2>
+      <p>FileShort's first tools process files in your browser, so files don't need to be uploaded to a server for these operations.</p>
+    </section>
+  </main>
+
+  <footer>
+    <strong>FileShort</strong>
+    <span>Compress. Convert. Simplify.</span>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>
