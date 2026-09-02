@@ -395,8 +395,256 @@
 
       </div>
 
-    </section>
+        <!-- =====================================================
+       MODULE 02 — TOOLS
+       -----------------------------------------------------
+       Add future tools here.
+       Existing tool IDs are preserved.
+       ===================================================== -->
 
+  <section id="tools" class="tools">
+
+    <div class="section-title">
+
+      <span>TOOLS</span>
+
+      <h2>Popular tools</h2>
+
+      <p>
+        Simple tools for the file problems you deal with every day.
+      </p>
+
+    </div>
+
+
+    <div class="tool-grid">
+
+
+      <!-- ================================================
+           TOOL 01 — IMAGE COMPRESSOR
+           EXISTING / WORKING
+           ================================================ -->
+
+      <a
+        class="tool-card active-card"
+        href="#image-compressor">
+
+        <div class="icon">
+          🖼️
+        </div>
+
+        <h3>
+          Compress Image
+        </h3>
+
+        <p>
+          Reduce JPG, PNG and WebP size quickly
+          while keeping good quality.
+        </p>
+
+        <span>
+          Try it →
+        </span>
+
+      </a>
+
+
+      <!-- ================================================
+           TOOL 02 — PDF COMPRESSOR
+           EXISTING / WORKING
+           ================================================ -->
+
+      <a
+        class="tool-card active-card"
+        href="#pdf-compressor">
+
+        <div class="icon">
+          📄
+        </div>
+
+        <h3>
+          Compress PDF
+        </h3>
+
+        <p>
+          Reduce PDF size toward your desired
+          target size.
+        </p>
+
+        <span>
+          Try it →
+        </span>
+
+      </a>
+
+
+      <!-- ================================================
+           TOOL 03 — IMAGE RESIZER
+           NEW
+           ================================================ -->
+
+      <a
+        class="tool-card active-card"
+        href="#image-resizer">
+
+        <div class="icon">
+          ↔️
+        </div>
+
+        <h3>
+          Resize Image
+        </h3>
+
+        <p>
+          Change image dimensions by pixels
+          or quick percentage presets.
+        </p>
+
+        <span>
+          Try it →
+        </span>
+
+      </a>
+
+
+      <!-- ================================================
+           TOOL 04 — IMAGE CONVERTER
+           FUTURE
+           ================================================ -->
+
+      <div class="tool-card coming">
+
+        <div class="icon">
+          🔄
+        </div>
+
+        <h3>
+          Convert Image
+        </h3>
+
+        <p>
+          Convert JPG, PNG and WebP
+          without uploading your files.
+        </p>
+
+        <span>
+          Coming next →
+        </span>
+
+      </div>
+
+
+      <!-- ================================================
+           TOOL 05 — JPG → PDF
+           FUTURE
+           ================================================ -->
+
+      <div class="tool-card coming">
+
+        <div class="icon">
+          🖼️→📄
+        </div>
+
+        <h3>
+          JPG → PDF
+        </h3>
+
+        <p>
+          Turn one or multiple images
+          into a PDF.
+        </p>
+
+        <span>
+          Coming soon →
+        </span>
+
+      </div>
+
+
+      <!-- ================================================
+           TOOL 06 — MERGE PDF
+           FUTURE
+           ================================================ -->
+
+      <div class="tool-card coming">
+
+        <div class="icon">
+          📚
+        </div>
+
+        <h3>
+          Merge PDF
+        </h3>
+
+        <p>
+          Combine multiple PDF files
+          into one document.
+        </p>
+
+        <span>
+          Coming soon →
+        </span>
+
+      </div>
+
+
+      <!-- ================================================
+           TOOL 07 — SPLIT PDF
+           FUTURE
+           ================================================ -->
+
+      <div class="tool-card coming">
+
+        <div class="icon">
+          ✂️
+        </div>
+
+        <h3>
+          Split PDF
+        </h3>
+
+        <p>
+          Extract pages or split a PDF
+          into separate files.
+        </p>
+
+        <span>
+          Coming soon →
+        </span>
+
+      </div>
+
+
+      <!-- ================================================
+           TOOL 08 — SMART OPTIMIZER
+           OUR DIFFERENTIATOR
+           ================================================ -->
+
+      <div class="tool-card coming featured-future">
+
+        <div class="icon">
+          🎯
+        </div>
+
+        <h3>
+          Smart Optimizer
+        </h3>
+
+        <p>
+          Tell FileShort the size you need
+          and let it find the best settings.
+        </p>
+
+        <span>
+          Planned →
+        </span>
+
+      </div>
+
+
+    </div>
+
+  </section>
 
 
     <!-- =====================================================
@@ -1059,7 +1307,344 @@
         to a server.
 
       </p>
+  <!-- =====================================================
+       MODULE 09 — IMAGE RESIZER
+       -----------------------------------------------------
+       FEATURE 03
 
+       This is an independent feature.
+       Do not rename these IDs after app.js is connected.
+       ===================================================== -->
+
+  <section
+    id="image-resizer"
+    class="workspace feature-module">
+
+
+    <div class="section-title">
+
+      <div>
+
+        <span class="step">
+          03
+        </span>
+
+        <div>
+
+          <h2>
+            Resize Image
+          </h2>
+
+          <p>
+            Change image dimensions quickly in your browser.
+          </p>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- ================================================
+         UPLOAD
+         ================================================ -->
+
+    <label
+      class="dropzone"
+      id="resizeDrop">
+
+      <input
+        id="resizeInput"
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+      >
+
+
+      <div class="upload-icon">
+        ↔
+      </div>
+
+
+      <strong>
+        Choose an image
+      </strong>
+
+
+      <span>
+        JPG, PNG or WebP
+      </span>
+
+    </label>
+
+
+
+    <!-- ================================================
+         CONTROLS
+         ================================================ -->
+
+    <div
+      id="resizeControls"
+      class="controls hidden">
+
+
+      <!-- FILE -->
+
+      <div class="file-row">
+
+        <div>
+
+          <strong id="resizeName">
+            Image
+          </strong>
+
+          <small id="resizeOriginal">
+            —
+          </small>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="btn"
+          id="resizeReset">
+
+          Change
+
+        </button>
+
+      </div>
+
+
+
+      <!-- ORIGINAL DIMENSIONS -->
+
+      <div class="resize-info">
+
+        <span>
+          Original dimensions
+        </span>
+
+        <strong id="resizeOriginalDimensions">
+          —
+        </strong>
+
+      </div>
+
+
+
+      <!-- QUICK PRESETS -->
+
+      <div class="resize-presets">
+
+        <span>
+          Quick resize
+        </span>
+
+
+        <div class="resize-preset-buttons">
+
+
+          <button
+            type="button"
+            class="resize-preset"
+            data-scale="0.25">
+
+            25%
+
+          </button>
+
+
+          <button
+            type="button"
+            class="resize-preset"
+            data-scale="0.50">
+
+            50%
+
+          </button>
+
+
+          <button
+            type="button"
+            class="resize-preset"
+            data-scale="0.75">
+
+            75%
+
+          </button>
+
+
+          <button
+            type="button"
+            class="resize-preset active"
+            data-scale="1">
+
+            100%
+
+          </button>
+
+
+        </div>
+
+      </div>
+
+
+
+      <!-- WIDTH -->
+
+      <label>
+
+        Width
+
+        <div class="input-with-unit">
+
+          <input
+            id="resizeWidth"
+            type="number"
+            min="1"
+            step="1"
+            inputmode="numeric"
+          >
+
+          <span>
+            px
+          </span>
+
+        </div>
+
+      </label>
+
+
+
+      <!-- HEIGHT -->
+
+      <label>
+
+        Height
+
+        <div class="input-with-unit">
+
+          <input
+            id="resizeHeight"
+            type="number"
+            min="1"
+            step="1"
+            inputmode="numeric"
+          >
+
+          <span>
+            px
+          </span>
+
+        </div>
+
+      </label>
+
+
+
+      <!-- ASPECT RATIO -->
+
+      <label class="resize-check">
+
+        <input
+          id="resizeLock"
+          type="checkbox"
+          checked
+        >
+
+        <span>
+          Keep aspect ratio
+        </span>
+
+      </label>
+
+
+
+      <!-- OUTPUT -->
+
+      <label>
+
+        Output format
+
+        <select id="resizeFormat">
+
+          <option value="image/jpeg">
+            JPG
+          </option>
+
+          <option value="image/png">
+            PNG
+          </option>
+
+          <option value="image/webp">
+            WebP
+          </option>
+
+        </select>
+
+      </label>
+
+
+
+      <!-- ACTION -->
+
+      <button
+        id="resizeImage"
+        type="button"
+        class="btn primary full">
+
+        Resize Image
+
+      </button>
+
+
+    </div>
+
+
+
+    <!-- ================================================
+         RESULT
+         ================================================ -->
+
+    <div
+      id="resizeResult"
+      class="result hidden">
+    </div>
+
+
+
+    <!-- ================================================
+         ERROR
+         ================================================ -->
+
+    <div
+      id="resizeError"
+      class="error hidden">
+    </div>
+
+
+  </section>
+
+
+  <!-- =====================================================
+       FUTURE FEATURE MODULES
+       -----------------------------------------------------
+       New features should be inserted BELOW this marker.
+
+       Planned:
+       - Image Converter
+       - Smart Target Size Optimizer
+       - Merge PDF
+       - Split PDF
+       - JPG → PDF
+       - PDF → JPG
+       - PDF Page Tools
+       - Privacy / Metadata Tools
+
+       Keep each feature in its own clearly labelled section.
+       ===================================================== -->
 
     </section>
   <!-- =====================================================
