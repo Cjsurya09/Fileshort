@@ -170,17 +170,7 @@ $("#compressImage")?.addEventListener("click", async () => {
 
   const url = URL.createObjectURL(blob);
 
-  $("#imageResult").innerHTML = `
-    <strong>Done!</strong>
-    <br>
-    Original: ${formatBytes(imageFile.size)}
-    <br>
-    Compressed: ${formatBytes(blob.size)}
-    <br><br>
-    <a class="btn primary" href="${url}" download="fileshort-compressed.${format === "image/webp" ? "webp" : "jpg"}">
-      Download Image →
-    </a>
-  `;
+  $("#imageResult").innerHTML = ` <strong>Done!</strong> <br> Original: ${formatBytes(imageFile.size)} <br> Compressed: ${formatBytes(blob.size)} <br><br> <a class="btn primary" href="${url}" download="fileshort-compressed.${format === "image/webp" ? "webp" : "jpg"}"> Download Image → </a> `;
 
   $("#imageResult").classList.remove("hidden");
 
@@ -324,12 +314,7 @@ function updateProgress(percent, text) {
 // CREATE COMPRESSED PDF
 // -----------------------------
 
-async function createCompressedPDF(
-  pdf,
-  pages,
-  scale,
-  quality
-) {
+async function createCompressedPDF( pdf, pages, scale, quality ) {
 
   const newPdf = await PDFLib.PDFDocument.create();
 
@@ -447,13 +432,7 @@ async function compressPDFToTarget(file, targetBytes) {
   const pageCount = pdf.numPages;
 
 
-  /*
-   * We try progressively smaller render sizes.
-   *
-   * This is important for aggressive compression such as:
-   *
-   * 100 MB → 1 MB
-   */
+  /* * We try progressively smaller render sizes. * * This is important for aggressive compression such as: * * 100 MB → 1 MB */
 
   const scales = [
     1.0,
@@ -484,9 +463,7 @@ async function compressPDFToTarget(file, targetBytes) {
     );
 
 
-    /*
-     * Try several JPEG qualities.
-     */
+    /* * Try several JPEG qualities. */
 
     const qualities = [
       qualityStart,
