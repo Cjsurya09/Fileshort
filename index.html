@@ -1062,7 +1062,299 @@
 
 
     </section>
+  <!-- =====================================================
+       FEATURE 03 — IMAGE RESIZER
+       -----------------------------------------------------
+       Independent module.
+       Existing Image/PDF compressor IDs are untouched.
+       ===================================================== -->
 
+  <section
+    id="image-resizer"
+    class="workspace feature-module">
+
+    <div class="section-title">
+
+      <div>
+
+        <span class="step">
+          03
+        </span>
+
+        <div>
+
+          <h2>
+            Resize Image
+          </h2>
+
+          <p>
+            Change image dimensions without changing the original file.
+          </p>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- IMAGE RESIZER UPLOAD -->
+
+    <label
+      class="dropzone"
+      id="resizeDrop">
+
+      <input
+        id="resizeInput"
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+      >
+
+      <div class="upload-icon">
+        ↕
+      </div>
+
+      <strong>
+        Choose an image
+      </strong>
+
+      <span>
+        JPG, PNG or WebP
+      </span>
+
+    </label>
+
+
+    <!-- IMAGE RESIZER CONTROLS -->
+
+    <div
+      id="resizeControls"
+      class="controls hidden">
+
+
+      <!-- FILE INFORMATION -->
+
+      <div class="file-row">
+
+        <div>
+
+          <strong id="resizeName">
+            Image
+          </strong>
+
+          <small id="resizeOriginal">
+            —
+          </small>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="btn"
+          id="resizeReset">
+
+          Change
+
+        </button>
+
+      </div>
+
+
+      <!-- ORIGINAL DIMENSIONS -->
+
+      <div class="resize-info">
+
+        <span>
+          Original dimensions
+        </span>
+
+        <strong id="resizeOriginalDimensions">
+          —
+        </strong>
+
+      </div>
+
+
+      <!-- QUICK RESIZE -->
+
+      <div class="resize-presets">
+
+        <span class="resize-label">
+          Quick resize
+        </span>
+
+
+        <div class="resize-preset-buttons">
+
+          <button
+            type="button"
+            class="resize-preset"
+            data-scale="0.25">
+
+            25%
+
+          </button>
+
+
+          <button
+            type="button"
+            class="resize-preset"
+            data-scale="0.50">
+
+            50%
+
+          </button>
+
+
+          <button
+            type="button"
+            class="resize-preset"
+            data-scale="0.75">
+
+            75%
+
+          </button>
+
+
+          <button
+            type="button"
+            class="resize-preset active"
+            data-scale="1">
+
+            100%
+
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- WIDTH -->
+
+      <label>
+
+        Width
+
+        <div class="input-with-unit">
+
+          <input
+            id="resizeWidth"
+            type="number"
+            min="1"
+            step="1"
+            inputmode="numeric"
+          >
+
+          <span>
+            px
+          </span>
+
+        </div>
+
+      </label>
+
+
+      <!-- HEIGHT -->
+
+      <label>
+
+        Height
+
+        <div class="input-with-unit">
+
+          <input
+            id="resizeHeight"
+            type="number"
+            min="1"
+            step="1"
+            inputmode="numeric"
+          >
+
+          <span>
+            px
+          </span>
+
+        </div>
+
+      </label>
+
+
+      <!-- ASPECT RATIO -->
+
+      <label class="resize-check">
+
+        <input
+          id="resizeLock"
+          type="checkbox"
+          checked
+        >
+
+        <span>
+          Keep aspect ratio
+        </span>
+
+      </label>
+
+
+      <!-- OUTPUT FORMAT -->
+
+      <label>
+
+        Output format
+
+        <select id="resizeFormat">
+
+          <option value="image/jpeg">
+            JPG
+          </option>
+
+          <option value="image/png">
+            PNG
+          </option>
+
+          <option value="image/webp">
+            WebP
+          </option>
+
+        </select>
+
+      </label>
+
+
+      <!-- RESIZE BUTTON -->
+
+      <button
+        id="resizeImage"
+        type="button"
+        class="btn primary full">
+
+        Resize Image
+
+      </button>
+
+
+    </div>
+
+
+    <!-- IMAGE RESIZER RESULT -->
+
+    <div
+      id="resizeResult"
+      class="result hidden">
+    </div>
+
+
+    <!-- IMAGE RESIZER ERROR -->
+
+    <div
+      id="resizeError"
+      class="error hidden">
+    </div>
+
+
+  </section>
 
 
     <!-- =====================================================
