@@ -32,6 +32,7 @@
 <body>
 
 <header class="topbar">
+
   <a class="brand" href="/">
     File<span>Short</span>
   </a>
@@ -40,12 +41,16 @@
     <a href="#tools">Tools</a>
     <a href="#about">About</a>
   </nav>
+
 </header>
 
 
 <main>
 
-  <!-- HERO -->
+  <!-- =========================
+       HERO
+  ========================== -->
+
   <section class="hero">
 
     <div class="badge">
@@ -80,23 +85,40 @@
   </section>
 
 
-  <!-- TOOLS -->
-  <section id="tools" class="tools">
+  <!-- =========================
+       TOOLS
+  ========================== -->
+
+  <section
+    id="tools"
+    class="tools">
 
     <div class="section-title">
+
       <span>TOOLS</span>
-      <h2>Popular tools</h2>
+
+      <h2>
+        Popular tools
+      </h2>
+
     </div>
 
+
     <div class="tool-grid">
+
+      <!-- IMAGE TOOL -->
 
       <a
         class="tool-card active-card"
         href="#image-compressor">
 
-        <div class="icon">🖼️</div>
+        <div class="icon">
+          🖼️
+        </div>
 
-        <h3>Compress Image</h3>
+        <h3>
+          Compress Image
+        </h3>
 
         <p>
           Reduce JPG, PNG and WebP size
@@ -110,13 +132,19 @@
       </a>
 
 
+      <!-- PDF TOOL -->
+
       <a
         class="tool-card"
         href="#pdf-compressor">
 
-        <div class="icon">📄</div>
+        <div class="icon">
+          📄
+        </div>
 
-        <h3>Compress PDF</h3>
+        <h3>
+          Compress PDF
+        </h3>
 
         <p>
           Reduce PDF size directly
@@ -130,11 +158,17 @@
       </a>
 
 
+      <!-- JPG TO PDF -->
+
       <div class="tool-card coming">
 
-        <div class="icon">🖼️</div>
+        <div class="icon">
+          🖼️
+        </div>
 
-        <h3>JPG → PDF</h3>
+        <h3>
+          JPG → PDF
+        </h3>
 
         <p>
           Convert images into PDF.
@@ -147,11 +181,17 @@
       </div>
 
 
+      <!-- SPLIT PDF -->
+
       <div class="tool-card coming">
 
-        <div class="icon">✂️</div>
+        <div class="icon">
+          ✂️
+        </div>
 
-        <h3>Split PDF</h3>
+        <h3>
+          Split PDF
+        </h3>
 
         <p>
           Split a PDF into separate files.
@@ -168,20 +208,43 @@
   </section>
 
 
-  <!-- IMAGE COMPRESSOR -->
+  <!-- =========================
+       IMAGE COMPRESSOR
+  ========================== -->
+
   <section
     id="image-compressor"
     class="workspace">
 
-    <div class="section-title">
 
-        <p class="privacy-text">🔒 All documents are privacy protected. Your files stay on your device.</p>
+    <!-- PRIVACY -->
+
+    <div class="privacy-banner">
+
+      <span class="privacy-icon">
+        🔒
+      </span>
+
+      <div>
+
+        <strong>
+          Your files stay private
+        </strong>
+
+        <p>
+          All documents are privacy protected.
+          Your files stay on your device.
+        </p>
+
       </div>
 
     </div>
 
+
+    <!-- IMAGE UPLOAD -->
+
     <label
-      class="dropzone"
+      class="dropzone upload-zone"
       id="imageDrop">
 
       <input
@@ -190,28 +253,36 @@
         accept="image/jpeg,image/png,image/webp"
       >
 
-      <div class="upload-icon">
-        ↑
+      <div class="upload-icon image-upload-icon">
+        🖼️
       </div>
 
-      <strong>
+      <strong class="upload-title">
         Choose an image
       </strong>
 
-      <span>
+      <span class="upload-subtitle">
         JPG, PNG or WebP
+      </span>
+
+      <span class="upload-button">
+        Choose file
       </span>
 
     </label>
 
 
+    <!-- IMAGE CONTROLS -->
+
     <div
       id="imageControls"
       class="controls hidden">
 
+
       <div class="file-row">
 
         <div>
+
           <strong id="imageName">
             Image
           </strong>
@@ -219,25 +290,34 @@
           <small id="imageOriginal">
             —
           </small>
+
         </div>
+
 
         <button
           type="button"
           class="btn small"
           id="imageReset">
+
           Change
+
         </button>
 
       </div>
 
 
+      <!-- QUALITY -->
+
       <label class="range-label">
 
         <span>
+
           Quality
+
           <output id="qualityValue">
             70%
           </output>
+
         </span>
 
         <input
@@ -250,6 +330,8 @@
 
       </label>
 
+
+      <!-- IMAGE FORMAT -->
 
       <label class="select-label">
 
@@ -272,6 +354,8 @@
       </label>
 
 
+      <!-- COMPRESS -->
+
       <button
         id="compressImage"
         type="button"
@@ -284,6 +368,8 @@
     </div>
 
 
+    <!-- IMAGE RESULT -->
+
     <div
       id="imageResult"
       class="result hidden">
@@ -294,12 +380,16 @@
 
       <p>
         Original:
-        <strong id="imageResultOriginal">—</strong>
+        <strong id="imageResultOriginal">
+          —
+        </strong>
       </p>
 
       <p>
         New:
-        <strong id="imageResultNew">—</strong>
+        <strong id="imageResultNew">
+          —
+        </strong>
       </p>
 
       <p id="imageSaved">
@@ -321,28 +411,43 @@
   </section>
 
 
-  <!-- PDF COMPRESSOR -->
+  <!-- =========================
+       PDF COMPRESSOR
+  ========================== -->
+
   <section
     id="pdf-compressor"
     class="workspace">
 
-    <div class="section-title">
 
-      <span>STEP 02</span>
+    <!-- PRIVACY -->
+
+    <div class="privacy-banner">
+
+      <span class="privacy-icon">
+        🔒
+      </span>
 
       <div>
-        <h2>
-          Compress PDF
-          <em>Beta</em>
-        </h2>
-        <p class="privacy-text">🔒 All documents are privacy protected. Your files stay on your device.</p>
+
+        <strong>
+          Your files stay private
+        </strong>
+
+        <p>
+          All documents are privacy protected.
+          Your files stay on your device.
+        </p>
+
       </div>
 
     </div>
 
 
+    <!-- PDF UPLOAD -->
+
     <label
-      class="dropzone"
+      class="dropzone upload-zone"
       id="pdfDrop">
 
       <input
@@ -351,24 +456,33 @@
         accept="application/pdf,.pdf"
       >
 
-      <div class="upload-icon">
-        ↑
+      <div class="upload-icon pdf-upload-icon">
+        📄
       </div>
 
-      <strong>
+      <strong class="upload-title">
         Choose a PDF
       </strong>
 
-      <span>
+      <span class="upload-subtitle">
         PDF files only
+      </span>
+
+      <span class="upload-button">
+        Choose file
       </span>
 
     </label>
 
 
+    <!-- PDF CONTROLS -->
+
     <div
       id="pdfControls"
       class="controls hidden">
+
+
+      <!-- FILE -->
 
       <div class="file-row">
 
@@ -384,6 +498,7 @@
 
         </div>
 
+
         <button
           type="button"
           class="btn small"
@@ -395,6 +510,8 @@
 
       </div>
 
+
+      <!-- TARGET SIZE -->
 
       <label class="select-label">
 
@@ -408,7 +525,9 @@
             1 MB
           </option>
 
-          <option value="5" selected>
+          <option
+            value="5"
+            selected>
             5 MB
           </option>
 
@@ -433,6 +552,8 @@
       </label>
 
 
+      <!-- CUSTOM TARGET -->
+
       <div
         id="customTargetBox"
         class="custom-target hidden">
@@ -456,6 +577,8 @@
       </div>
 
 
+      <!-- PDF COMPRESS -->
+
       <button
         id="compressPdf"
         type="button"
@@ -466,12 +589,16 @@
       </button>
 
 
+      <!-- PDF PROGRESS -->
+
       <div
         id="pdfProgress"
         class="progress hidden">
 
         <div class="progress-bar">
+
           <div id="pdfProgressBar"></div>
+
         </div>
 
         <p id="pdfProgressText">
@@ -483,6 +610,8 @@
     </div>
 
 
+    <!-- PDF RESULT -->
+
     <div
       id="pdfResult"
       class="result hidden">
@@ -493,12 +622,16 @@
 
       <p>
         Original:
-        <strong id="pdfResultOriginal">—</strong>
+        <strong id="pdfResultOriginal">
+          —
+        </strong>
       </p>
 
       <p>
         New:
-        <strong id="pdfResultNew">—</strong>
+        <strong id="pdfResultNew">
+          —
+        </strong>
       </p>
 
       <p id="pdfSaved">
@@ -518,27 +651,39 @@
     </div>
 
 
+    <!-- PDF ERROR -->
+
     <div
       id="pdfError"
       class="error hidden">
     </div>
 
+
+    <!-- PRIVACY NOTE -->
+
     <p class="note">
-      PDF compression runs locally in your browser.
-      Your files are not uploaded to a server.
+
+      🔒 All documents are privacy protected.
+      Your files stay on your device.
+
     </p>
 
   </section>
 
 
-  <!-- ABOUT -->
+  <!-- =========================
+       ABOUT
+  ========================== -->
+
   <section
     id="about"
     class="about">
 
     <div class="section-title">
 
-      <span>ABOUT</span>
+      <span>
+        ABOUT
+      </span>
 
       <h2>
         Simple. Private. Free.
@@ -547,8 +692,8 @@
     </div>
 
     <p>
-      FileShort provides simple file tools that
-      work directly in your browser.
+      FileShort provides simple file tools
+      that work directly in your browser.
       Your files stay on your device.
     </p>
 
@@ -556,6 +701,10 @@
 
 </main>
 
+
+<!-- =========================
+     FOOTER
+========================== -->
 
 <footer>
 
@@ -569,6 +718,8 @@
 
 </footer>
 
+
+<!-- APP -->
 
 <script src="app.js"></script>
 
