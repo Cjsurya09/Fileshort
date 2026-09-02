@@ -732,3 +732,158 @@ canvas {
 body {
   overflow-x: hidden;
 }
+
+/* ==============================
+   UPGRADED FILE PICKER
+   ============================== */
+
+.file-picker {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 82px;
+  padding: 16px 20px;
+  box-sizing: border-box;
+  border-radius: 20px;
+  cursor: pointer;
+  overflow: hidden;
+
+  background: linear-gradient(
+    135deg,
+    #eef2ff,
+    #f5f3ff,
+    #fff1f7
+  );
+
+  border: 2px solid #e4e7ff;
+  transition: all 0.25s ease;
+}
+
+.file-picker:hover {
+  transform: translateY(-2px);
+  border-color: #6366f1;
+  box-shadow: 0 10px 25px rgba(99, 102, 241, 0.15);
+}
+
+.file-picker:active {
+  transform: scale(0.98);
+}
+
+.file-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 50px;
+  height: 50px;
+
+  border-radius: 15px;
+
+  background: linear-gradient(
+    135deg,
+    #6366f1,
+    #8b5cf6
+  );
+
+  font-size: 25px;
+  flex-shrink: 0;
+}
+
+.pdf-picker .file-icon {
+  background: linear-gradient(
+    135deg,
+    #ef4444,
+    #ec4899
+  );
+}
+
+.file-picker-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.file-picker-text strong {
+  font-size: 17px;
+  color: #171717;
+}
+
+.file-picker-text small {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.file-picker input[type="file"] {
+  position: absolute;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  opacity: 0;
+  cursor: pointer;
+}
+
+
+/* ==============================
+   PRIVACY MESSAGE
+   ============================== */
+
+.privacy-text {
+  margin-top: 14px;
+  padding: 12px 15px;
+
+  border-radius: 12px;
+
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+
+  color: #166534;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+
+/* ==============================
+   REMOVE OLD STEP LABELS
+   ============================== */
+
+.step,
+.step-label,
+.step-number {
+  display: none !important;
+}
+
+
+/* ==============================
+   MOBILE
+   ============================== */
+
+@media (max-width: 600px) {
+
+  .file-picker {
+    min-height: 76px;
+    padding: 13px 15px;
+    border-radius: 18px;
+  }
+
+  .file-icon {
+    width: 46px;
+    height: 46px;
+    font-size: 22px;
+  }
+
+  .file-picker-text strong {
+    font-size: 16px;
+  }
+
+  .file-picker-text small {
+    font-size: 12px;
+  }
+
+  .privacy-text {
+    font-size: 13px;
+  }
+}
