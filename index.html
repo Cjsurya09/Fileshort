@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
 
@@ -10,718 +11,1037 @@
 
   <meta
     name="description"
-    content="FileShort - Free browser-based image and PDF compression tools."
+    content="FileShort - Free, fast and private browser-based tools for compressing images and PDFs."
   >
 
-  <title>FileShort - Free File Tools</title>
+  <meta
+    name="theme-color"
+    content="#5146d8"
+  >
 
+  <title>FileShort – Free File Tools</title>
+
+  <!-- =========================================================
+       STYLES
+       ========================================================= -->
   <link rel="stylesheet" href="styles.css">
 
-  <!-- PDF.js -->
-  <script
-    src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs"
-    type="module">
-  </script>
+
+  <!-- =========================================================
+       PDF LIBRARIES
+       ========================================================= -->
 
   <!-- PDF-LIB -->
   <script
     src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js">
   </script>
+
+  <!-- PDF.JS -->
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs"
+    type="module">
+  </script>
+
 </head>
+
 
 <body>
 
-<header class="topbar">
 
-  <a class="brand" href="/">
-    File<span>Short</span>
-  </a>
+  <!-- =========================================================
+       HEADER
+       ========================================================= -->
 
-  <nav>
-    <a href="#tools">Tools</a>
-    <a href="#about">About</a>
-  </nav>
+  <header class="topbar">
 
-</header>
+    <a
+      class="brand"
+      href="/"
+      aria-label="FileShort Home">
+
+      File<span>Short</span>
+
+    </a>
 
 
-<main>
+    <nav aria-label="Main navigation">
 
-  <!-- =========================
-       HERO
-  ========================== -->
-
-  <section class="hero">
-
-    <div class="badge">
-      FREE FILE TOOLS
-    </div>
-
-    <h1>
-      Make your files <span>smaller.</span>
-    </h1>
-
-    <p>
-      Compress images and PDFs quickly in your browser.
-      No account required.
-    </p>
-
-    <div class="hero-actions">
-
-      <a
-        class="btn primary"
-        href="#image-compressor">
-        Compress Image
+      <a href="#tools">
+        Tools
       </a>
 
-      <a
-        class="btn secondary"
-        href="#pdf-compressor">
-        Compress PDF
+      <a href="#about">
+        About
       </a>
 
-    </div>
+    </nav>
 
-  </section>
-
-
-  <!-- =========================
-       TOOLS
-  ========================== -->
-
-  <section
-    id="tools"
-    class="tools">
-
-    <div class="section-title">
-
-      <span>TOOLS</span>
-
-      <h2>
-        Popular tools
-      </h2>
-
-    </div>
+  </header>
 
 
-    <div class="tool-grid">
 
-      <!-- IMAGE TOOL -->
+  <!-- =========================================================
+       MAIN CONTENT
+       ========================================================= -->
 
-      <a
-        class="tool-card active-card"
-        href="#image-compressor">
-
-        <div class="icon">
-          🖼️
-        </div>
-
-        <h3>
-          Compress Image
-        </h3>
-
-        <p>
-          Reduce JPG, PNG and WebP size
-          with a target quality.
-        </p>
-
-        <span>
-          Try it →
-        </span>
-
-      </a>
+  <main>
 
 
-      <!-- PDF TOOL -->
+    <!-- =======================================================
+         HERO SECTION
+         ======================================================= -->
 
-      <a
-        class="tool-card"
-        href="#pdf-compressor">
+    <section class="hero">
 
-        <div class="icon">
-          📄
-        </div>
-
-        <h3>
-          Compress PDF
-        </h3>
-
-        <p>
-          Reduce PDF size directly
-          in your browser.
-        </p>
-
-        <span>
-          Try it →
-        </span>
-
-      </a>
-
-
-      <!-- JPG TO PDF -->
-
-      <div class="tool-card coming">
-
-        <div class="icon">
-          🖼️
-        </div>
-
-        <h3>
-          JPG → PDF
-        </h3>
-
-        <p>
-          Convert images into PDF.
-        </p>
-
-        <span>
-          Coming next
-        </span>
-
+      <div class="badge">
+        ⚡ FREE FILE TOOLS
       </div>
 
 
-      <!-- SPLIT PDF -->
+      <h1>
+        Make your files
+        <span>smaller.</span>
+      </h1>
 
-      <div class="tool-card coming">
-
-        <div class="icon">
-          ✂️
-        </div>
-
-        <h3>
-          Split PDF
-        </h3>
-
-        <p>
-          Split a PDF into separate files.
-        </p>
-
-        <span>
-          Coming next
-        </span>
-
-      </div>
-
-    </div>
-
-  </section>
-
-
-  <!-- =========================
-       IMAGE COMPRESSOR
-  ========================== -->
-
-  <section
-    id="image-compressor"
-    class="workspace">
-
-
-    <!-- PRIVACY -->
-
-    <div class="privacy-banner">
-
-      <span class="privacy-icon">
-        🔒
-      </span>
-
-      <div>
-
-        <strong>
-          Your files stay private
-        </strong>
-
-        <p>
-          All documents are privacy protected.
-          Your files stay on your device.
-        </p>
-
-      </div>
-
-    </div>
-
-
-    <!-- IMAGE UPLOAD -->
-
-    <label
-      class="dropzone upload-zone"
-      id="imageDrop">
-
-      <input
-        id="imageInput"
-        type="file"
-        accept="image/jpeg,image/png,image/webp"
-      >
-
-      <div class="upload-icon image-upload-icon">
-        🖼️
-      </div>
-
-      <strong class="upload-title">
-        Choose an image
-      </strong>
-
-      <span class="upload-subtitle">
-        JPG, PNG or WebP
-      </span>
-
-      <span class="upload-button">
-        Choose file
-      </span>
-
-    </label>
-
-
-    <!-- IMAGE CONTROLS -->
-
-    <div
-      id="imageControls"
-      class="controls hidden">
-
-
-      <div class="file-row">
-
-        <div>
-
-          <strong id="imageName">
-            Image
-          </strong>
-
-          <small id="imageOriginal">
-            —
-          </small>
-
-        </div>
-
-
-        <button
-          type="button"
-          class="btn small"
-          id="imageReset">
-
-          Change
-
-        </button>
-
-      </div>
-
-
-      <!-- QUALITY -->
-
-      <label class="range-label">
-
-        <span>
-
-          Quality
-
-          <output id="qualityValue">
-            70%
-          </output>
-
-        </span>
-
-        <input
-          id="quality"
-          type="range"
-          min="10"
-          max="95"
-          value="70"
-        >
-
-      </label>
-
-
-      <!-- IMAGE FORMAT -->
-
-      <label class="select-label">
-
-        <span>
-          Output format
-        </span>
-
-        <select id="imageFormat">
-
-          <option value="image/jpeg">
-            JPG
-          </option>
-
-          <option value="image/webp">
-            WebP
-          </option>
-
-        </select>
-
-      </label>
-
-
-      <!-- COMPRESS -->
-
-      <button
-        id="compressImage"
-        type="button"
-        class="btn primary full">
-
-        Compress image
-
-      </button>
-
-    </div>
-
-
-    <!-- IMAGE RESULT -->
-
-    <div
-      id="imageResult"
-      class="result hidden">
-
-      <h3>
-        Done!
-      </h3>
 
       <p>
-        Original:
-        <strong id="imageResultOriginal">
-          —
-        </strong>
+        Fast, simple and private file compression.
+        Everything happens directly on your device.
       </p>
 
-      <p>
-        New:
-        <strong id="imageResultNew">
-          —
-        </strong>
-      </p>
 
-      <p id="imageSaved">
-        —
-      </p>
+      <div class="hero-actions">
 
-      <a
-        id="downloadImage"
-        class="download"
-        href="#"
-        download>
+        <a
+          class="btn primary"
+          href="#image-compressor">
 
-        Download image →
+          🖼️ Compress Image
 
-      </a>
-
-    </div>
-
-  </section>
+        </a>
 
 
-  <!-- =========================
-       PDF COMPRESSOR
-  ========================== -->
+        <a
+          class="btn secondary"
+          href="#pdf-compressor">
 
-  <section
-    id="pdf-compressor"
-    class="workspace">
+          📄 Compress PDF
+
+        </a>
+
+      </div>
 
 
-    <!-- PRIVACY -->
+      <!-- Privacy highlight -->
 
-    <div class="privacy-banner">
+      <div class="hero-privacy">
 
-      <span class="privacy-icon">
         🔒
-      </span>
+        <strong>Your files stay private.</strong>
+        Nothing is uploaded to a server.
 
-      <div>
+      </div>
 
-        <strong>
-          Your files stay private
-        </strong>
+    </section>
+
+
+
+    <!-- =======================================================
+         TOOLS SECTION
+         ======================================================= -->
+
+    <section
+      id="tools"
+      class="tools">
+
+
+      <div class="section-heading">
+
+        <span class="section-label">
+          TOOLS
+        </span>
+
+        <h2>
+          What do you want to do?
+        </h2>
 
         <p>
-          All documents are privacy protected.
-          Your files stay on your device.
+          Choose a tool and get started instantly.
         </p>
 
       </div>
 
-    </div>
 
 
-    <!-- PDF UPLOAD -->
-
-    <label
-      class="dropzone upload-zone"
-      id="pdfDrop">
-
-      <input
-        id="pdfInput"
-        type="file"
-        accept="application/pdf,.pdf"
-      >
-
-      <div class="upload-icon pdf-upload-icon">
-        📄
-      </div>
-
-      <strong class="upload-title">
-        Choose a PDF
-      </strong>
-
-      <span class="upload-subtitle">
-        PDF files only
-      </span>
-
-      <span class="upload-button">
-        Choose file
-      </span>
-
-    </label>
+      <div class="tool-grid">
 
 
-    <!-- PDF CONTROLS -->
+        <!-- IMAGE TOOL -->
 
-    <div
-      id="pdfControls"
-      class="controls hidden">
+        <a
+          class="tool-card active-card"
+          href="#image-compressor">
 
+          <div class="tool-icon image-icon">
+            🖼️
+          </div>
 
-      <!-- FILE -->
+          <h3>
+            Compress Image
+          </h3>
 
-      <div class="file-row">
+          <p>
+            Reduce JPG, PNG and WebP
+            file sizes quickly.
+          </p>
 
-        <div>
-
-          <strong id="pdfName">
-            PDF
-          </strong>
-
-          <small id="pdfOriginal">
-            —
-          </small>
-
-        </div>
-
-
-        <button
-          type="button"
-          class="btn small"
-          id="pdfReset">
-
-          Change
-
-        </button>
-
-      </div>
-
-
-      <!-- TARGET SIZE -->
-
-      <label class="select-label">
-
-        <span>
-          Target size
-        </span>
-
-        <select id="pdfTarget">
-
-          <option value="1">
-            1 MB
-          </option>
-
-          <option
-            value="5"
-            selected>
-            5 MB
-          </option>
-
-          <option value="10">
-            10 MB
-          </option>
-
-          <option value="25">
-            25 MB
-          </option>
-
-          <option value="50">
-            50 MB
-          </option>
-
-          <option value="custom">
-            Custom size
-          </option>
-
-        </select>
-
-      </label>
-
-
-      <!-- CUSTOM TARGET -->
-
-      <div
-        id="customTargetBox"
-        class="custom-target hidden">
-
-        <label>
-
-          <span>
-            Custom target (MB)
+          <span class="tool-link">
+            Start compressing →
           </span>
 
+        </a>
+
+
+
+        <!-- PDF TOOL -->
+
+        <a
+          class="tool-card active-card"
+          href="#pdf-compressor">
+
+          <div class="tool-icon pdf-icon">
+            📄
+          </div>
+
+          <h3>
+            Compress PDF
+          </h3>
+
+          <p>
+            Reduce PDF size directly
+            on your device.
+          </p>
+
+          <span class="tool-link">
+            Start compressing →
+          </span>
+
+        </a>
+
+
+
+        <!-- JPG TO PDF -->
+
+        <div class="tool-card coming">
+
+          <div class="tool-icon">
+            🔄
+          </div>
+
+          <h3>
+            JPG → PDF
+          </h3>
+
+          <p>
+            Convert your images
+            into PDF documents.
+          </p>
+
+          <span>
+            Coming soon
+          </span>
+
+        </div>
+
+
+
+        <!-- SPLIT PDF -->
+
+        <div class="tool-card coming">
+
+          <div class="tool-icon">
+            ✂️
+          </div>
+
+          <h3>
+            Split PDF
+          </h3>
+
+          <p>
+            Split one PDF into
+            separate files.
+          </p>
+
+          <span>
+            Coming soon
+          </span>
+
+        </div>
+
+
+      </div>
+
+    </section>
+
+
+
+    <!-- =======================================================
+         STEP 01
+         IMAGE COMPRESSOR
+         ======================================================= -->
+
+    <section
+      id="image-compressor"
+      class="workspace">
+
+
+      <!-- STEP HEADER -->
+
+      <div class="workspace-heading">
+
+        <div class="step-number">
+          STEP 01
+        </div>
+
+        <h2>
+          Image Compression
+        </h2>
+
+        <p>
+          Make your images smaller without unnecessary hassle.
+        </p>
+
+      </div>
+
+
+
+      <!-- PRIVACY MESSAGE -->
+
+      <div class="privacy-card">
+
+        <div class="privacy-icon">
+          🔒
+        </div>
+
+        <div>
+
+          <strong>
+            Your files stay private
+          </strong>
+
+          <p>
+            All documents are privacy protected.
+            Your files stay on your device.
+          </p>
+
+        </div>
+
+      </div>
+
+
+
+      <!-- IMAGE UPLOAD -->
+
+      <label
+        class="upload-card"
+        id="imageDrop"
+        for="imageInput">
+
+
+        <input
+          id="imageInput"
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+        >
+
+
+        <div class="upload-visual">
+
+          <div class="upload-icon">
+            🖼️
+          </div>
+
+        </div>
+
+
+        <strong class="upload-title">
+          Choose an image
+        </strong>
+
+
+        <span class="upload-subtitle">
+          JPG, PNG or WebP
+        </span>
+
+
+        <span class="upload-button">
+          Choose File
+        </span>
+
+
+        <small>
+          Select an image from your device
+        </small>
+
+      </label>
+
+
+
+      <!-- IMAGE CONTROLS -->
+
+      <div
+        id="imageControls"
+        class="controls hidden">
+
+
+        <!-- SELECTED FILE -->
+
+        <div class="file-row">
+
+          <div class="file-info">
+
+            <strong id="imageName">
+              Image
+            </strong>
+
+            <small id="imageOriginal">
+              —
+            </small>
+
+          </div>
+
+
+          <button
+            type="button"
+            class="btn small"
+            id="imageReset">
+
+            Change
+
+          </button>
+
+        </div>
+
+
+
+        <!-- IMAGE QUALITY -->
+
+        <label class="range-control">
+
+          <div class="control-heading">
+
+            <span>
+              Image quality
+            </span>
+
+            <output id="qualityValue">
+              70%
+            </output>
+
+          </div>
+
+
           <input
-            id="customTarget"
-            type="number"
-            min="0.1"
-            step="0.1"
-            value="5"
+            id="quality"
+            type="range"
+            min="10"
+            max="95"
+            value="70"
           >
 
         </label>
 
+
+
+        <!-- OUTPUT FORMAT -->
+
+        <label class="select-control">
+
+          <span>
+            Output format
+          </span>
+
+
+          <select id="imageFormat">
+
+            <option value="image/jpeg">
+              JPG
+            </option>
+
+            <option value="image/webp">
+              WebP
+            </option>
+
+          </select>
+
+        </label>
+
+
+
+        <!-- COMPRESS BUTTON -->
+
+        <button
+          id="compressImage"
+          type="button"
+          class="btn primary full">
+
+          ⚡ Compress Image
+
+        </button>
+
+
       </div>
 
 
-      <!-- PDF COMPRESS -->
 
-      <button
-        id="compressPdf"
-        type="button"
-        class="btn primary full">
-
-        Optimize PDF
-
-      </button>
-
-
-      <!-- PDF PROGRESS -->
+      <!-- IMAGE RESULT -->
 
       <div
-        id="pdfProgress"
-        class="progress hidden">
+        id="imageResult"
+        class="result hidden">
 
-        <div class="progress-bar">
+      </div>
 
-          <div id="pdfProgressBar"></div>
 
+    </section>
+
+
+
+    <!-- =======================================================
+         STEP 02
+         PDF COMPRESSOR
+         ======================================================= -->
+
+    <section
+      id="pdf-compressor"
+      class="workspace">
+
+
+      <!-- STEP HEADER -->
+
+      <div class="workspace-heading">
+
+        <div class="step-number">
+          STEP 02
         </div>
 
-        <p id="pdfProgressText">
-          Preparing PDF...
+        <h2>
+          PDF Compression
+        </h2>
+
+        <p>
+          Reduce the size of your PDF while keeping it usable.
         </p>
 
       </div>
 
-    </div>
 
 
-    <!-- PDF RESULT -->
+      <!-- PRIVACY MESSAGE -->
 
-    <div
-      id="pdfResult"
-      class="result hidden">
+      <div class="privacy-card">
 
-      <h3>
-        Done!
-      </h3>
+        <div class="privacy-icon">
+          🔒
+        </div>
 
-      <p>
-        Original:
-        <strong id="pdfResultOriginal">
-          —
+        <div>
+
+          <strong>
+            Your files stay private
+          </strong>
+
+          <p>
+            All documents are privacy protected.
+            Your files stay on your device.
+          </p>
+
+        </div>
+
+      </div>
+
+
+
+      <!-- PDF UPLOAD -->
+
+      <label
+        class="upload-card pdf-upload"
+        id="pdfDrop"
+        for="pdfInput">
+
+
+        <input
+          id="pdfInput"
+          type="file"
+          accept="application/pdf,.pdf"
+        >
+
+
+        <div class="upload-visual">
+
+          <div class="upload-icon pdf-upload-icon">
+            📄
+          </div>
+
+        </div>
+
+
+        <strong class="upload-title">
+          Choose a PDF
         </strong>
-      </p>
 
-      <p>
-        New:
-        <strong id="pdfResultNew">
-          —
-        </strong>
-      </p>
 
-      <p id="pdfSaved">
-        —
-      </p>
+        <span class="upload-subtitle">
+          PDF files only
+        </span>
 
-      <a
-        id="downloadPdf"
-        class="download"
-        href="#"
-        download>
 
-        Download PDF →
+        <span class="upload-button">
+          Choose File
+        </span>
 
-      </a>
+
+        <small>
+          Select a PDF document from your device
+        </small>
+
+      </label>
+
+
+
+      <!-- =====================================================
+           PDF CONTROLS
+           ===================================================== -->
+
+      <div
+        id="pdfControls"
+        class="controls hidden">
+
+
+        <!-- SELECTED PDF -->
+
+        <div class="file-row">
+
+          <div class="file-info">
+
+            <strong id="pdfName">
+              PDF file
+            </strong>
+
+            <small id="pdfOriginal">
+              —
+            </small>
+
+          </div>
+
+
+          <button
+            type="button"
+            class="btn small"
+            id="pdfReset">
+
+            Change
+
+          </button>
+
+        </div>
+
+
+
+        <!-- TARGET SIZE -->
+
+        <div class="target-box">
+
+
+          <div class="target-heading">
+
+            <div class="target-icon">
+              🎯
+            </div>
+
+            <div>
+
+              <h3>
+                Desired PDF size
+              </h3>
+
+              <p>
+                Choose the maximum size for your compressed PDF.
+              </p>
+
+            </div>
+
+          </div>
+
+
+
+          <!-- QUICK SIZE BUTTONS -->
+
+          <div class="size-options">
+
+
+            <button
+              type="button"
+              class="size-btn"
+              data-size="1">
+
+              1 MB
+
+            </button>
+
+
+            <button
+              type="button"
+              class="size-btn active"
+              data-size="5">
+
+              5 MB
+
+            </button>
+
+
+            <button
+              type="button"
+              class="size-btn"
+              data-size="10">
+
+              10 MB
+
+            </button>
+
+
+            <button
+              type="button"
+              class="size-btn"
+              data-size="25">
+
+              25 MB
+
+            </button>
+
+
+            <button
+              type="button"
+              class="size-btn"
+              data-size="50">
+
+              50 MB
+
+            </button>
+
+
+          </div>
+
+
+
+          <!-- CUSTOM TARGET -->
+
+          <label class="custom-size">
+
+            <span>
+              Custom target size
+            </span>
+
+
+            <div class="input-with-unit">
+
+              <input
+                id="targetSize"
+                type="number"
+                min="0.1"
+                step="0.1"
+                value="5"
+              >
+
+              <span>
+                MB
+              </span>
+
+            </div>
+
+          </label>
+
+
+        </div>
+
+
+
+        <!-- PDF QUALITY -->
+
+        <label class="range-control">
+
+          <div class="control-heading">
+
+            <span>
+              Compression quality
+            </span>
+
+            <output id="pdfQualityValue">
+              60%
+            </output>
+
+          </div>
+
+
+          <input
+            id="pdfQuality"
+            type="range"
+            min="10"
+            max="90"
+            value="60"
+          >
+
+        </label>
+
+
+
+        <!-- COMPRESS PDF BUTTON -->
+
+        <button
+          id="compressPdf"
+          type="button"
+          class="btn primary full">
+
+          ⚡ Compress PDF
+
+        </button>
+
+
+
+        <!-- PDF PROGRESS -->
+
+        <div
+          id="pdfProgress"
+          class="progress-box hidden">
+
+
+          <div class="progress-header">
+
+            <strong>
+              Compressing your PDF...
+            </strong>
+
+            <span id="progressPercent">
+              0%
+            </span>
+
+          </div>
+
+
+          <div class="progress-bar">
+
+            <div
+              id="progressFill"
+              class="progress-fill">
+            </div>
+
+          </div>
+
+
+          <strong id="progressText">
+            Preparing PDF...
+          </strong>
+
+        </div>
+
+
+      </div>
+
+
+
+      <!-- PDF RESULT -->
+
+      <div
+        id="pdfResult"
+        class="result hidden">
+
+      </div>
+
+
+
+      <!-- PDF ERROR -->
+
+      <div
+        id="pdfError"
+        class="error hidden">
+
+      </div>
+
+
+
+      <!-- INFORMATION -->
+
+      <div class="info-note">
+
+        <span class="info-icon">
+          ℹ️
+        </span>
+
+        <p>
+          Large PDFs may take longer to process.
+          Very aggressive compression may reduce image quality.
+        </p>
+
+      </div>
+
+
+    </section>
+
+
+
+    <!-- =======================================================
+         ABOUT SECTION
+         ======================================================= -->
+
+    <section
+      id="about"
+      class="about">
+
+
+      <div class="section-heading">
+
+        <span class="section-label">
+          ABOUT FILESHORT
+        </span>
+
+        <h2>
+          Simple. Private. Free.
+        </h2>
+
+      </div>
+
+
+      <div class="about-grid">
+
+
+        <div class="about-card">
+
+          <div class="about-icon">
+            ⚡
+          </div>
+
+          <h3>
+            Fast
+          </h3>
+
+          <p>
+            FileShort is designed to process
+            your files directly on your device.
+          </p>
+
+        </div>
+
+
+
+        <div class="about-card">
+
+          <div class="about-icon">
+            🔒
+          </div>
+
+          <h3>
+            Private
+          </h3>
+
+          <p>
+            Your files stay on your device
+            instead of being uploaded.
+          </p>
+
+        </div>
+
+
+
+        <div class="about-card">
+
+          <div class="about-icon">
+            💻
+          </div>
+
+          <h3>
+            Browser Based
+          </h3>
+
+          <p>
+            Use FileShort from your phone,
+            tablet or computer.
+          </p>
+
+        </div>
+
+
+      </div>
+
+
+    </section>
+
+
+  </main>
+
+
+
+  <!-- =========================================================
+       FOOTER
+       ========================================================= -->
+
+  <footer>
+
+    <div class="footer-content">
+
+
+      <div>
+
+        <div class="brand">
+          File<span>Short</span>
+        </div>
+
+        <p>
+          Free file tools.
+          Simple. Fast. Private.
+        </p>
+
+      </div>
+
+
+      <div class="footer-links">
+
+        <a href="#tools">
+          Tools
+        </a>
+
+        <a href="#about">
+          About
+        </a>
+
+      </div>
+
 
     </div>
 
 
-    <!-- PDF ERROR -->
-
-    <div
-      id="pdfError"
-      class="error hidden">
-    </div>
-
-
-    <!-- PRIVACY NOTE -->
-
-    <p class="note">
-
-      🔒 All documents are privacy protected.
-      Your files stay on your device.
-
-    </p>
-
-  </section>
-
-
-  <!-- =========================
-       ABOUT
-  ========================== -->
-
-  <section
-    id="about"
-    class="about">
-
-    <div class="section-title">
+    <div class="footer-bottom">
 
       <span>
-        ABOUT
+        © 2026 FileShort
       </span>
 
-      <h2>
-        Simple. Private. Free.
-      </h2>
+      <span>
+        🔒 Your files stay private
+      </span>
 
     </div>
 
-    <p>
-      FileShort provides simple file tools
-      that work directly in your browser.
-      Your files stay on your device.
-    </p>
-
-  </section>
-
-</main>
+  </footer>
 
 
-<!-- =========================
-     FOOTER
-========================== -->
 
-<footer>
+  <!-- =========================================================
+       APPLICATION JAVASCRIPT
+       ========================================================= -->
 
-  <div class="brand">
-    File<span>Short</span>
-  </div>
+  <script src="app.js"></script>
 
-  <p>
-    Free browser-based file utilities.
-  </p>
-
-</footer>
-
-
-<!-- APP -->
-
-<script src="app.js"></script>
 
 </body>
+
 </html>
