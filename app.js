@@ -29,20 +29,35 @@ function formatBytes(bytes) {
 // -----------------------------
 
 function setupInput(inputSelector, dropSelector, onFile) {
-  const input = $(inputSelector);
-  const drop = $(dropSelector);
+  const input = document.querySelector(inputSelector);
+  const drop = document.querySelector(dropSelector);
 
-  if (!input || !drop) return;
+  if (!input) {
+    console.error("File input not found:", inputSelector);
+    return;
+  }
 
-  input.addEventListener("change", () => {
-    if (input.files && input.files[0]) {
-      onFile(input.files[0]);
+  // FILE PICKER
+  input.addEventListener("change", function () {
+    const file = this.files && this.files[0];
+
+    console.log("FILE SELECTED:", file);
+
+    if (file) {
+      onFile(file);
     }
   });
+
+  // DROPZONE
+  if (!drop) {
+    console.warn("Dropzone not found:", dropSelector);
+    return;
+  }
 
   ["dragenter", "dragover"].forEach(eventName => {
     drop.addEventListener(eventName, e => {
       e.preventDefault();
+      e.stopPropagation();
       drop.classList.add("drag");
     });
   });
@@ -50,12 +65,15 @@ function setupInput(inputSelector, dropSelector, onFile) {
   ["dragleave", "drop"].forEach(eventName => {
     drop.addEventListener(eventName, e => {
       e.preventDefault();
+      e.stopPropagation();
       drop.classList.remove("drag");
     });
   });
 
   drop.addEventListener("drop", e => {
-    const file = e.dataTransfer.files[0];
+    const file = e.dataTransfer.files?.[0];
+
+    console.log("FILE DROPPED:", file);
 
     if (file) {
       onFile(file);
@@ -179,8 +197,6 @@ setupInput(
   "#pdfDrop",
   file => {
 
-    // Android browsers may return an empty or different MIME type.
-    // Check both MIME type and file extension.
     const isPDF =
       file.type === "application/pdf" ||
       file.name.toLowerCase().endsWith(".pdf");
@@ -192,18 +208,30 @@ setupInput(
 
     pdfFile = file;
 
-    $("#pdfName").textContent = file.name;
-    $("#pdfOriginal").textContent = formatBytes(file.size);
+    console.log("PDF READY:", file.name, file.size);
 
-    $("#pdfControls").classList.remove("hidden");
-    $("#pdfResult").classList.add("hidden");
+    const nameElement = document.querySelector("#pdfName");
+    const sizeElement = document.querySelector("#pdfOriginal");
+    const controlsElement = document.querySelector("#pdfControls");
+    const resultElement = document.querySelector("#pdfResult");
 
-    // Make sure the selected file is visible immediately.
-    console.log("PDF selected:", file.name, file.size, file.type);
+    if (nameElement) {
+      nameElement.textContent = file.name;
+    }
+
+    if (sizeElement) {
+      sizeElement.textContent = formatBytes(file.size);
+    }
+
+    if (controlsElement) {
+      controlsElement.classList.remove("hidden");
+    }
+
+    if (resultElement) {
+      resultElement.classList.add("hidden");
+    }
   }
 );
-
-
 // -----------------------------
 // PDF TARGET BUTTONS
 // -----------------------------
