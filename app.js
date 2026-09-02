@@ -1,674 +1,1063 @@
 /* =========================================================
-   FILESHORT - APP.JS
-   Image compressor + PDF target-size compressor
+   FILESHORT
+   APP.JS
+   Version 2.0
    ========================================================= */
 
-"use strict";
 
-/* ---------------------------------------------------------
-   HELPERS
---------------------------------------------------------- */
+/* =========================================================
+   01. GLOBAL SETTINGS
+   ========================================================= */
 
-const $ = (selector) => document.querySelector(selector);
+const FILESHORT = {
 
-const formatBytes = (bytes) => {
-  if (!Number.isFinite(bytes)) return "—";
+  image: {
+    maxWidth: 4096,
+    maxHeight: 4096,
+    defaultQuality: 70
+  },
 
-  if (bytes < 1024) {
-    return `${bytes} B`;
+  pdf: {
+    defaultTargetMB: 5,
+    minQuality: 20,
+    maxQuality: 90,
+    maxAttempts: 7
+  },
+
+  limits: {
+    maxImageMB: 100,
+    maxPDFMB: 500
   }
 
-  if (bytes < 1024 * 1024) {
-    return `${(bytes / 1024).toFixed(1)} KB`;
-  }
-
-  if (bytes < 1024 * 1024 * 1024) {
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  }
-
-  return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
 };
 
 
-const percentSaved = (original, current) => {
-  if (!original || current >= original) {
-    return 0;
+/* =========================================================
+   02. COMMON UTILITIES
+   ========================================================= */
+
+
+/**
+ * Convert bytes to a readable file size.
+ */
+function formatBytes(bytes) {
+
+  if (!Number.isFinite(bytes) || bytes <= 0) {
+    return "0 B";
   }
 
-  return Math.round((1 - current / original) * 100);
-};
+  const units = ["B", "KB", "MB", "GB"];
 
+  const index = Math.min(
+    Math.floor(Math.log(bytes) / Math.log(1024)),
+    units.length - 1
+  );
 
-const show = (element) => {
-  if (element) {
-    element.classList.remove("hidden");
-  }
-};
-
-
-const hide = (element) => {
-  if (element) {
-    element.classList.add("hidden");
-  }
-};
-
-
-/* ---------------------------------------------------------
-   IMAGE COMPRESSOR
---------------------------------------------------------- */
-
-let imageFile = null;
-let imageObjectUrl = null;
-
-
-/* Elements */
-
-const imageInput = $("#imageInput");
-const imageDrop = $("#imageDrop");
-const imageControls = $("#imageControls");
-const imageResult = $("#imageResult");
-
-const imageName = $("#imageName");
-const imageOriginal = $("#imageOriginal");
-
-const imageReset = $("#imageReset");
-
-const quality = $("#quality");
-const qualityValue = $("#qualityValue");
-
-const imageFormat = $("#imageFormat");
-const compressImageButton = $("#compressImage");
-
-const imageResultOriginal = $("#imageResultOriginal");
-const imageResultNew = $("#imageResultNew");
-const imageSaved = $("#imageSaved");
-
-const downloadImage = $("#downloadImage");
-
-
-/* Quality display */
-
-if (quality) {
-  quality.addEventListener("input", () => {
-    qualityValue.textContent = `${quality.value}%`;
-  });
-}
-
-
-/* Image file selection */
-
-if (imageInput) {
-  imageInput.addEventListener("change", () => {
-    const file = imageInput.files && imageInput.files[0];
-
-    if (file) {
-      loadImage(file);
-    }
-  });
-}
-
-
-/* Image drag and drop */
-
-if (imageDrop) {
-
-  ["dragenter", "dragover"].forEach((eventName) => {
-
-    imageDrop.addEventListener(eventName, (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-
-      imageDrop.classList.add("dragging");
-    });
-
-  });
-
-
-  ["dragleave", "drop"].forEach((eventName) => {
-
-    imageDrop.addEventListener(eventName, (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-
-      imageDrop.classList.remove("dragging");
-    });
-
-  });
-
-
-  imageDrop.addEventListener("drop", (event) => {
-
-    const file =
-      event.dataTransfer &&
-      event.dataTransfer.files &&
-      event.dataTransfer.files[0];
-
-    if (file) {
-      loadImage(file);
-    }
-
-  });
+  return (
+    bytes / Math.pow(1024, index)
+  ).toFixed(index === 0 ? 0 : 2) + " " + units[index];
 
 }
 
 
-/* Load image */
-
-function loadImage(file) {
-
-  if (!file.type.startsWith("image/")) {
-
-    alert("Please choose a JPG, PNG or WebP image.");
-
-    return;
-  }
+/**
+ * Convert MB to bytes.
+ */
+function mbToBytes(mb) {
+  return mb * 1024 * 1024;
+}
 
 
-  imageFile = file;
-
-  imageName.textContent = file.name;
-  imageOriginal.textContent = formatBytes(file.size);
-
-
-  hide(imageResult);
-  show(imageControls);
+/**
+ * Safely get an element.
+ */
+function $(id) {
+  return document.getElementById(id);
+}
 
 
-  imageDrop.classList.add("selected");
+/**
+ * Show an element.
+ */
+function show(element) {
 
+  if (!element) return;
 
-  imageObjectUrl = URL.createObjectURL(file);
+  element.classList.remove("hidden");
 
 }
 
 
-/* Reset image */
+/**
+ * Hide an element.
+ */
+function hide(element) {
 
-if (imageReset) {
+  if (!element) return;
 
-  imageReset.addEventListener("click", () => {
+  element.classList.add("hidden");
 
-    imageFile = null;
+}
 
-    if (imageObjectUrl) {
-      URL.revokeObjectURL(imageObjectUrl);
-      imageObjectUrl = null;
+
+/**
+ * Set text safely.
+ */
+function setText(element, text) {
+
+  if (!element) return;
+
+  element.textContent = text;
+
+}
+
+
+/**
+ * Create a download URL.
+ */
+function createDownloadURL(blob) {
+
+  return URL.createObjectURL(blob);
+
+}
+
+
+/**
+ * Download a blob.
+ */
+function downloadBlob(blob, filename) {
+
+  const url = createDownloadURL(blob);
+
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = filename;
+
+  document.body.appendChild(link);
+
+  link.click();
+
+  link.remove();
+
+  setTimeout(() => {
+    URL.revokeObjectURL(url);
+  }, 10000);
+
+}
+
+
+/**
+ * Generate a safe filename.
+ */
+function getOutputName(filename, extension) {
+
+  const cleanName =
+    filename
+      .replace(/\.[^/.]+$/, "")
+      .replace(/[^\w\- ]+/g, "")
+      .trim() || "File";
+
+  return `${cleanName}-compressed.${extension}`;
+
+}
+
+
+/**
+ * Yield to browser.
+ *
+ * This prevents the interface from appearing
+ * completely frozen during heavy operations.
+ */
+function yieldToBrowser() {
+
+  return new Promise(resolve => {
+
+    if ("requestIdleCallback" in window) {
+
+      requestIdleCallback(
+        () => resolve(),
+        { timeout: 50 }
+      );
+
+    } else {
+
+      setTimeout(resolve, 0);
+
     }
 
-    if (imageInput) {
-      imageInput.value = "";
-    }
-
-    hide(imageControls);
-    hide(imageResult);
-
   });
 
 }
 
 
-/* Compress image */
+/* =========================================================
+   03. IMAGE COMPRESSOR
+   ========================================================= */
 
-if (compressImageButton) {
+const ImageCompressor = {
 
-  compressImageButton.addEventListener("click", async () => {
+  file: null,
+  outputURL: null,
 
-    if (!imageFile) {
-      alert("Please choose an image first.");
+
+  init() {
+
+    const input = $("imageInput");
+    const drop = $("imageDrop");
+    const quality = $("quality");
+    const qualityValue = $("qualityValue");
+    const compressButton = $("compressImage");
+    const resetButton = $("imageReset");
+
+
+    if (!input) return;
+
+
+    /* File selection */
+
+    input.addEventListener(
+      "change",
+      event => {
+
+        const file =
+          event.target.files?.[0];
+
+        if (file) {
+
+          this.handleFile(file);
+
+        }
+
+      }
+    );
+
+
+    /* Quality */
+
+    if (quality) {
+
+      quality.addEventListener(
+        "input",
+        () => {
+
+          setText(
+            qualityValue,
+            `${quality.value}%`
+          );
+
+        }
+      );
+
+    }
+
+
+    /* Compress */
+
+    if (compressButton) {
+
+      compressButton.addEventListener(
+        "click",
+        () => this.compress()
+      );
+
+    }
+
+
+    /* Reset */
+
+    if (resetButton) {
+
+      resetButton.addEventListener(
+        "click",
+        () => this.reset()
+      );
+
+    }
+
+
+    /* Drag and drop */
+
+    this.setupDragDrop(
+      drop,
+      input
+    );
+
+  },
+
+
+  handleFile(file) {
+
+    if (!file.type.startsWith("image/")) {
+
+      alert("Please choose a valid image file.");
+
       return;
+
     }
 
 
-    compressImageButton.disabled = true;
-    compressImageButton.textContent = "Compressing...";
+    if (
+      file.size >
+      FILESHORT.limits.maxImageMB * 1024 * 1024
+    ) {
+
+      alert(
+        `Image is too large. Maximum supported size is ${FILESORT.limits.maxImageMB} MB.`
+      );
+
+      return;
+
+    }
+
+
+    this.file = file;
+
+
+    setText(
+      $("imageName"),
+      file.name
+    );
+
+
+    setText(
+      $("imageOriginal"),
+      formatBytes(file.size)
+    );
+
+
+    show($("imageControls"));
+
+    hide($("imageResult"));
+
+  },
+
+
+  async compress() {
+
+    if (!this.file) {
+
+      alert("Please choose an image first.");
+
+      return;
+
+    }
+
+
+    const button = $("compressImage");
+
+    const quality =
+      Number($("quality")?.value || 70) / 100;
+
+
+    const format =
+      $("imageFormat")?.value ||
+      "image/jpeg";
+
+
+    button.disabled = true;
+
+    button.textContent =
+      "⏳ Compressing...";
 
 
     try {
 
-      const result = await compressImage(
-        imageFile,
-        Number(quality.value) / 100,
-        imageFormat.value
-      );
-
-
-      const newBlob = result.blob;
-
-
-      imageResultOriginal.textContent =
-        formatBytes(imageFile.size);
-
-      imageResultNew.textContent =
-        formatBytes(newBlob.size);
-
-
-      const saved = percentSaved(
-        imageFile.size,
-        newBlob.size
-      );
-
-
-      imageSaved.textContent =
-        saved > 0
-          ? `Saved: ${saved}%`
-          : "The compressed file is not smaller than the original.";
-
-
-      if (downloadImage.dataset.url) {
-        URL.revokeObjectURL(downloadImage.dataset.url);
-      }
-
-
-      const url = URL.createObjectURL(newBlob);
-
-      downloadImage.dataset.url = url;
-
-      downloadImage.href = url;
-
-      downloadImage.download =
-        getCompressedImageName(
-          imageFile.name,
-          imageFormat.value
+      const blob =
+        await this.compressImage(
+          this.file,
+          quality,
+          format
         );
 
 
-      show(imageResult);
+      if (!blob) {
+
+        throw new Error(
+          "Image compression failed."
+        );
+
+      }
+
+
+      this.showResult(
+        blob,
+        format
+      );
 
     } catch (error) {
 
       console.error(error);
 
       alert(
-        "Image compression failed. Please try another image."
+        "Unable to compress this image. Please try another image."
       );
 
     } finally {
 
-      compressImageButton.disabled = false;
-      compressImageButton.textContent = "Compress image";
+      button.disabled = false;
+
+      button.textContent =
+        "⚡ Compress Image";
 
     }
 
-  });
+  },
 
-}
 
-
-/* Image compression engine */
-
-async function compressImage(file, imageQuality, outputType) {
-
-  const bitmap = await createImageBitmap(file);
-
-
-  const maxDimension = 4000;
-
-  let width = bitmap.width;
-  let height = bitmap.height;
-
-
-  if (width > maxDimension || height > maxDimension) {
-
-    const ratio =
-      Math.min(
-        maxDimension / width,
-        maxDimension / height
-      );
-
-    width = Math.round(width * ratio);
-    height = Math.round(height * ratio);
-
-  }
-
-
-  const canvas = document.createElement("canvas");
-
-  canvas.width = width;
-  canvas.height = height;
-
-
-  const ctx = canvas.getContext("2d", {
-    alpha: true
-  });
-
-
-  ctx.drawImage(
-    bitmap,
-    0,
-    0,
-    width,
-    height
-  );
-
-
-  bitmap.close();
-
-
-  const blob = await new Promise((resolve, reject) => {
-
-    canvas.toBlob(
-      (result) => {
-
-        if (result) {
-          resolve(result);
-        } else {
-          reject(
-            new Error("Could not create image.")
-          );
-        }
-
-      },
-      outputType,
-      imageQuality
-    );
-
-  });
-
-
-  return {
-    blob,
-    width,
-    height
-  };
-
-}
-
-
-/* Image download name */
-
-function getCompressedImageName(filename, type) {
-
-  const base =
-    filename.replace(/\.[^/.]+$/, "");
-
-
-  if (type === "image/webp") {
-    return `${base}-compressed.webp`;
-  }
-
-
-  return `${base}-compressed.jpg`;
-
-}
-
-
-/* ---------------------------------------------------------
-   PDF COMPRESSOR
---------------------------------------------------------- */
-
-let pdfFile = null;
-
-
-/* Elements */
-
-const pdfInput = $("#pdfInput");
-const pdfDrop = $("#pdfDrop");
-
-const pdfControls = $("#pdfControls");
-const pdfResult = $("#pdfResult");
-const pdfError = $("#pdfError");
-
-const pdfName = $("#pdfName");
-const pdfOriginal = $("#pdfOriginal");
-
-const pdfReset = $("#pdfReset");
-
-const pdfTarget = $("#pdfTarget");
-const customTargetBox = $("#customTargetBox");
-const customTarget = $("#customTarget");
-
-const compressPdfButton = $("#compressPdf");
-
-const pdfProgress = $("#pdfProgress");
-const pdfProgressBar = $("#pdfProgressBar");
-const pdfProgressText = $("#pdfProgressText");
-
-const pdfResultOriginal = $("#pdfResultOriginal");
-const pdfResultNew = $("#pdfResultNew");
-const pdfSaved = $("#pdfSaved");
-
-const downloadPdf = $("#downloadPdf");
-
-
-/* PDF.js */
-
-let pdfjs = null;
-let pdfJsLoading = null;
-
-
-/* Load PDF.js only when needed */
-
-async function loadPdfJs() {
-
-  if (pdfjs) {
-    return pdfjs;
-  }
-
-
-  if (!pdfJsLoading) {
-
-    pdfJsLoading = import(
-      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs"
-    );
-
-  }
-
-
-  pdfjs = await pdfJsLoading;
-
-
-  if (
-    pdfjs.GlobalWorkerOptions &&
-    !pdfjs.GlobalWorkerOptions.workerSrc
+  compressImage(
+    file,
+    quality,
+    format
   ) {
 
-    pdfjs.GlobalWorkerOptions.workerSrc =
-      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs";
+    return new Promise(
+      (resolve, reject) => {
 
-  }
+        const image =
+          new Image();
 
-
-  return pdfjs;
-
-}
-
-
-/* PDF file selection */
-
-if (pdfInput) {
-
-  pdfInput.addEventListener("change", () => {
-
-    const file =
-      pdfInput.files &&
-      pdfInput.files[0];
-
-    if (file) {
-      loadPdf(file);
-    }
-
-  });
-
-}
+        const url =
+          URL.createObjectURL(file);
 
 
-/* PDF drag and drop */
+        image.onload = () => {
 
-if (pdfDrop) {
+          try {
 
-  ["dragenter", "dragover"].forEach((eventName) => {
+            let width =
+              image.naturalWidth;
 
-    pdfDrop.addEventListener(eventName, (event) => {
-
-      event.preventDefault();
-      event.stopPropagation();
-
-      pdfDrop.classList.add("dragging");
-
-    });
-
-  });
+            let height =
+              image.naturalHeight;
 
 
-  ["dragleave", "drop"].forEach((eventName) => {
+            /*
+             * Prevent unnecessarily huge
+             * canvas operations.
+             */
 
-    pdfDrop.addEventListener(eventName, (event) => {
+            const maxWidth =
+              FILESHORT.image.maxWidth;
 
-      event.preventDefault();
-      event.stopPropagation();
-
-      pdfDrop.classList.remove("dragging");
-
-    });
-
-  });
+            const maxHeight =
+              FILESHORT.image.maxHeight;
 
 
-  pdfDrop.addEventListener("drop", (event) => {
+            if (
+              width > maxWidth ||
+              height > maxHeight
+            ) {
 
-    const file =
-      event.dataTransfer &&
-      event.dataTransfer.files &&
-      event.dataTransfer.files[0];
+              const ratio =
+                Math.min(
+                  maxWidth / width,
+                  maxHeight / height
+                );
 
-    if (file) {
-      loadPdf(file);
-    }
+              width =
+                Math.round(width * ratio);
 
-  });
+              height =
+                Math.round(height * ratio);
 
-}
-
-
-/* Load PDF */
-
-function loadPdf(file) {
-
-  const isPdf =
-    file.type === "application/pdf" ||
-    file.name.toLowerCase().endsWith(".pdf");
+            }
 
 
-  if (!isPdf) {
+            const canvas =
+              document.createElement("canvas");
 
-    showPdfError(
-      "Please choose a PDF file."
+
+            canvas.width = width;
+            canvas.height = height;
+
+
+            const context =
+              canvas.getContext(
+                "2d",
+                {
+                  alpha: true
+                }
+              );
+
+
+            context.drawImage(
+              image,
+              0,
+              0,
+              width,
+              height
+            );
+
+
+            canvas.toBlob(
+              blob => {
+
+                URL.revokeObjectURL(url);
+
+                if (!blob) {
+
+                  reject(
+                    new Error(
+                      "Could not create compressed image."
+                    )
+                  );
+
+                  return;
+
+                }
+
+                resolve(blob);
+
+              },
+              format,
+              quality
+            );
+
+
+          } catch (error) {
+
+            URL.revokeObjectURL(url);
+
+            reject(error);
+
+          }
+
+        };
+
+
+        image.onerror = () => {
+
+          URL.revokeObjectURL(url);
+
+          reject(
+            new Error(
+              "Could not read image."
+            )
+          );
+
+        };
+
+
+        image.src = url;
+
+      }
     );
 
-    return;
+  },
+
+
+  showResult(
+    blob,
+    format
+  ) {
+
+    if (this.outputURL) {
+
+      URL.revokeObjectURL(
+        this.outputURL
+      );
+
+    }
+
+
+    this.outputURL =
+      URL.createObjectURL(blob);
+
+
+    const originalSize =
+      this.file.size;
+
+    const newSize =
+      blob.size;
+
+
+    setText(
+      $("imageResultOriginal"),
+      formatBytes(originalSize)
+    );
+
+
+    setText(
+      $("imageResultNew"),
+      formatBytes(newSize)
+    );
+
+
+    const saved =
+      originalSize > 0
+        ? Math.max(
+            0,
+            (1 - newSize / originalSize) * 100
+          )
+        : 0;
+
+
+    setText(
+      $("imageSaved"),
+      saved > 0
+        ? `You saved ${saved.toFixed(1)}%`
+        : "The compressed file is not smaller."
+    );
+
+
+    const download =
+      $("downloadImage");
+
+
+    if (download) {
+
+      download.href =
+        this.outputURL;
+
+      download.download =
+        getOutputName(
+          this.file.name,
+          format === "image/webp"
+            ? "webp"
+            : "jpg"
+        );
+
+    }
+
+
+    show($("imageResult"));
+
+    $("imageResult")?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest"
+    });
+
+  },
+
+
+  reset() {
+
+    this.file = null;
+
+
+    if (this.outputURL) {
+
+      URL.revokeObjectURL(
+        this.outputURL
+      );
+
+      this.outputURL = null;
+
+    }
+
+
+    const input =
+      $("imageInput");
+
+    if (input) {
+
+      input.value = "";
+
+    }
+
+
+    hide($("imageControls"));
+
+    hide($("imageResult"));
+
+  },
+
+
+  setupDragDrop(
+    zone,
+    input
+  ) {
+
+    if (!zone) return;
+
+
+    [
+      "dragenter",
+      "dragover"
+    ].forEach(eventName => {
+
+      zone.addEventListener(
+        eventName,
+        event => {
+
+          event.preventDefault();
+
+          zone.classList.add("drag");
+
+        }
+      );
+
+    });
+
+
+    [
+      "dragleave",
+      "drop"
+    ].forEach(eventName => {
+
+      zone.addEventListener(
+        eventName,
+        event => {
+
+          event.preventDefault();
+
+          zone.classList.remove("drag");
+
+        }
+      );
+
+    });
+
+
+    zone.addEventListener(
+      "drop",
+      event => {
+
+        const file =
+          event.dataTransfer?.files?.[0];
+
+        if (file) {
+
+          this.handleFile(file);
+
+        }
+
+      }
+    );
 
   }
 
-
-  pdfFile = file;
-
-
-  pdfName.textContent = file.name;
-
-  pdfOriginal.textContent =
-    formatBytes(file.size);
+};
 
 
-  hide(pdfResult);
-  hide(pdfError);
+/* =========================================================
+   04. PDF COMPRESSOR
+   ========================================================= */
 
-  show(pdfControls);
+const PDFCompressor = {
 
-  pdfDrop.classList.add("selected");
+  file: null,
+  outputURL: null,
 
-}
+
+  init() {
+
+    const input =
+      $("pdfInput");
+
+    if (!input) return;
 
 
-/* PDF target selection */
+    input.addEventListener(
+      "change",
+      event => {
 
-if (pdfTarget) {
+        const file =
+          event.target.files?.[0];
 
-  pdfTarget.addEventListener("change", () => {
+        if (file) {
 
-    if (pdfTarget.value === "custom") {
+          this.handleFile(file);
 
-      show(customTargetBox);
+        }
 
-    } else {
+      }
+    );
 
-      hide(customTargetBox);
+
+    const compressButton =
+      $("compressPdf");
+
+
+    if (compressButton) {
+
+      compressButton.addEventListener(
+        "click",
+        () => this.compress()
+      );
 
     }
 
-  });
 
-}
+    const resetButton =
+      $("pdfReset");
 
 
-/* Reset PDF */
+    if (resetButton) {
 
-if (pdfReset) {
+      resetButton.addEventListener(
+        "click",
+        () => this.reset()
+      );
 
-  pdfReset.addEventListener("click", () => {
-
-    pdfFile = null;
-
-    if (pdfInput) {
-      pdfInput.value = "";
     }
 
-    hide(pdfControls);
-    hide(pdfResult);
-    hide(pdfError);
-    hide(pdfProgress);
 
-  });
+    this.setupTargetButtons();
 
-}
+    this.setupDragDrop();
+
+  },
 
 
-/* Get target size */
+  handleFile(file) {
 
-function getTargetBytes() {
+    const isPDF =
+      file.type === "application/pdf" ||
+      file.name.toLowerCase().endsWith(".pdf");
 
-  if (pdfTarget.value === "custom") {
 
-    const value =
-      Number(customTarget.value);
+    if (!isPDF) {
+
+      this.showError(
+        "Please choose a valid PDF file."
+      );
+
+      return;
+
+    }
 
 
     if (
-      !Number.isFinite(value) ||
-      value <= 0
+      file.size >
+      FILESHORT.limits.maxPDFMB * 1024 * 1024
     ) {
 
-      throw new Error(
-        "Please enter a valid target size."
+      this.showError(
+        `PDF is too large. Maximum supported size is ${FILESORT.limits.maxPDFMB} MB.`
+      );
+
+      return;
+
+    }
+
+
+    this.file = file;
+
+
+    setText(
+      $("pdfName"),
+      file.name
+    );
+
+
+    setText(
+      $("pdfOriginal"),
+      formatBytes(file.size)
+    );
+
+
+    hide($("pdfError"));
+
+    hide($("pdfResult"));
+
+    show($("pdfControls"));
+
+  },
+
+
+  /* =======================================================
+     TARGET SIZE CONTROLS
+  ======================================================= */
+
+  setupTargetButtons() {
+
+    const buttons =
+      document.querySelectorAll(
+        ".size-btn"
+      );
+
+
+    const targetInput =
+      $("targetSize");
+
+
+    buttons.forEach(button => {
+
+      button.addEventListener(
+        "click",
+        () => {
+
+          buttons.forEach(
+            item =>
+              item.classList.remove("active")
+          );
+
+
+          button.classList.add("active");
+
+
+          const size =
+            Number(
+              button.dataset.size
+            );
+
+
+          if (targetInput) {
+
+            targetInput.value =
+              size;
+
+          }
+
+        }
+      );
+
+    });
+
+
+    if (targetInput) {
+
+      targetInput.addEventListener(
+        "input",
+        () => {
+
+          buttons.forEach(
+            item =>
+              item.classList.remove("active")
+          );
+
+        }
       );
 
     }
 
 
-    return value * 1024 * 1024;
+    /*
+     * Backwards compatibility
+     * with your previous HTML.
+     */
 
-  }
+    const oldTarget =
+      $("pdfTarget");
+
+    const oldCustom =
+      $("customTarget");
+
+    const oldCustomBox =
+      $("customTargetBox");
 
 
-  return (
-    Number(pdfTarget.value) *
-    1024 *
-    1024
-  );
+    if (oldTarget) {
 
-}
+      oldTarget.addEventListener(
+        "change",
+        () => {
+
+          if (
+            oldTarget.value ===
+            "custom"
+          ) {
+
+            show(oldCustomBox);
+
+          } else {
+
+            hide(oldCustomBox);
+
+          }
+
+        }
+      );
+
+    }
 
 
-/* ---------------------------------------------------------
-   PDF COMPRESSION BUTTON
---------------------------------------------------------- */
+    if (oldCustom) {
 
-if (compressPdfButton) {
+      oldCustom.addEventListener(
+        "input",
+        () => {
 
-  compressPdfButton.addEventListener("click", async () => {
+          if (targetInput) {
 
-    if (!pdfFile) {
+            targetInput.value =
+              oldCustom.value;
 
-      showPdfError(
+          }
+
+        }
+      );
+
+    }
+
+  },
+
+
+  getTargetMB() {
+
+    const newTarget =
+      Number(
+        $("targetSize")?.value
+      );
+
+
+    if (
+      Number.isFinite(newTarget) &&
+      newTarget > 0
+    ) {
+
+      return newTarget;
+
+    }
+
+
+    const oldTarget =
+      $("pdfTarget");
+
+
+    if (
+      oldTarget &&
+      oldTarget.value !== "custom"
+    ) {
+
+      const value =
+        Number(oldTarget.value);
+
+
+      if (
+        Number.isFinite(value) &&
+        value > 0
+      ) {
+
+        return value;
+
+      }
+
+    }
+
+
+    const oldCustom =
+      Number(
+        $("customTarget")?.value
+      );
+
+
+    if (
+      Number.isFinite(oldCustom) &&
+      oldCustom > 0
+    ) {
+
+      return oldCustom;
+
+    }
+
+
+    return FILESHORT.pdf.defaultTargetMB;
+
+  },
+
+
+  /* =======================================================
+     PDF COMPRESSION ENGINE
+  ======================================================= */
+
+  async compress() {
+
+    if (!this.file) {
+
+      this.showError(
         "Please choose a PDF first."
       );
 
@@ -677,674 +1066,1100 @@ if (compressPdfButton) {
     }
 
 
-    let targetBytes;
+    if (
+      typeof PDFLib ===
+      "undefined"
+    ) {
 
-
-    try {
-
-      targetBytes = getTargetBytes();
-
-    } catch (error) {
-
-      showPdfError(error.message);
+      this.showError(
+        "PDF engine is not available. Please refresh the page."
+      );
 
       return;
 
     }
 
 
-    hide(pdfError);
-    hide(pdfResult);
-
-    show(pdfProgress);
+    const button =
+      $("compressPdf");
 
 
-    compressPdfButton.disabled = true;
-    compressPdfButton.textContent = "Compressing...";
+    const targetMB =
+      this.getTargetMB();
+
+
+    const targetBytes =
+      mbToBytes(targetMB);
+
+
+    hide($("pdfError"));
+
+    hide($("pdfResult"));
+
+    show($("pdfProgress"));
+
+
+    button.disabled = true;
+
+    button.textContent =
+      "⏳ Compressing PDF...";
+
+
+    this.updateProgress(
+      3,
+      "Reading PDF..."
+    );
 
 
     try {
 
-      const result =
-        await compressPdfToTarget(
-          pdfFile,
-          targetBytes
+      /*
+       * Load the original PDF.
+       */
+
+      const sourceBytes =
+        await this.file.arrayBuffer();
+
+
+      await yieldToBrowser();
+
+
+      this.updateProgress(
+        10,
+        "Analyzing PDF..."
+      );
+
+
+      const sourcePDF =
+        await PDFLib.PDFDocument.load(
+          sourceBytes,
+          {
+            ignoreEncryption: true,
+            updateMetadata: false
+          }
         );
 
 
-      const blob = result.blob;
+      const pageCount =
+        sourcePDF.getPageCount();
 
 
-      pdfResultOriginal.textContent =
-        formatBytes(pdfFile.size);
+      /*
+       * First attempt:
+       * save the PDF with compression enabled.
+       *
+       * This is extremely fast for PDFs
+       * where the main issue is redundant
+       * PDF structure rather than huge images.
+       */
+
+      this.updateProgress(
+        20,
+        `Optimizing ${pageCount} pages...`
+      );
 
 
-      pdfResultNew.textContent =
-        formatBytes(blob.size);
-
-
-      const saved =
-        percentSaved(
-          pdfFile.size,
-          blob.size
+      let result =
+        await this.fastSave(
+          sourcePDF
         );
 
 
-      if (saved > 0) {
+      if (
+        result.length <=
+        targetBytes
+      ) {
 
-        pdfSaved.textContent =
-          `Saved: ${saved}%`;
+        this.updateProgress(
+          100,
+          "Compression complete."
+        );
 
-      } else {
 
-        pdfSaved.textContent =
-          "The PDF could not be reduced further at this target.";
+        this.showResult(
+          new Blob(
+            [result],
+            {
+              type: "application/pdf"
+            }
+          ),
+          targetMB
+        );
+
+
+        return;
 
       }
 
 
-      if (downloadPdf.dataset.url) {
-        URL.revokeObjectURL(
-          downloadPdf.dataset.url
+      /*
+       * If the PDF is still too large,
+       * try image-based compression.
+       *
+       * This is slower, but is much more
+       * effective for scanned/image-heavy PDFs.
+       */
+
+      this.updateProgress(
+        25,
+        "PDF contains large content. Applying stronger compression..."
+      );
+
+
+      result =
+        await this.imageBasedCompression(
+          sourceBytes,
+          targetBytes,
+          pageCount
         );
-      }
 
 
-      const url =
-        URL.createObjectURL(blob);
+      this.updateProgress(
+        100,
+        "Compression complete."
+      );
 
 
-      downloadPdf.dataset.url = url;
-
-      downloadPdf.href = url;
-
-      downloadPdf.download =
-        getCompressedPdfName(
-          pdfFile.name
-        );
-
-
-      show(pdfResult);
+      this.showResult(
+        new Blob(
+          [result],
+          {
+            type: "application/pdf"
+          }
+        ),
+        targetMB
+      );
 
 
     } catch (error) {
 
-      console.error(error);
-
-      showPdfError(
-        error.message ||
-        "PDF compression failed."
+      console.error(
+        "PDF compression error:",
+        error
       );
+
+
+      this.showError(
+        this.getFriendlyPDFError(error)
+      );
+
 
     } finally {
 
-      compressPdfButton.disabled = false;
+      button.disabled = false;
 
-      compressPdfButton.textContent =
-        "Optimize PDF";
+      button.textContent =
+        "⚡ Compress PDF";
 
-      setPdfProgress(
-        100,
-        "Finished"
+    }
+
+  },
+
+
+  /* =======================================================
+     FAST PDF SAVE
+  ======================================================= */
+
+  async fastSave(pdf) {
+
+    return await pdf.save({
+      useObjectStreams: true,
+      addDefaultPage: false,
+      updateFieldAppearances: false
+    });
+
+  },
+
+
+  /* =======================================================
+     IMAGE-BASED PDF COMPRESSION
+  ======================================================= */
+
+  async imageBasedCompression(
+    sourceBytes,
+    targetBytes,
+    pageCount
+  ) {
+
+    /*
+     * PDF.js is loaded as a module in index.html.
+     *
+     * We look for the global/module API if available.
+     */
+
+    const pdfjs =
+      window.pdfjsLib;
+
+
+    /*
+     * If PDF.js is not globally available,
+     * fall back to structural optimization.
+     */
+
+    if (!pdfjs) {
+
+      const fallback =
+        await PDFLib.PDFDocument.load(
+          sourceBytes,
+          {
+            ignoreEncryption: true,
+            updateMetadata: false
+          }
+        );
+
+
+      return await this.fastSave(
+        fallback
       );
 
     }
+
+
+    /*
+     * Compression levels.
+     *
+     * We start with reasonable quality and
+     * progressively reduce it only when needed.
+     */
+
+    const attempts = [
+
+      {
+        scale: 1.35,
+        quality: 0.72
+      },
+
+      {
+        scale: 1.15,
+        quality: 0.62
+      },
+
+      {
+        scale: 1.00,
+        quality: 0.52
+      },
+
+      {
+        scale: 0.85,
+        quality: 0.44
+      },
+
+      {
+        scale: 0.72,
+        quality: 0.36
+      },
+
+      {
+        scale: 0.60,
+        quality: 0.28
+      },
+
+      {
+        scale: 0.50,
+        quality: 0.22
+      }
+
+    ];
+
+
+    let bestResult = null;
+
+
+    for (
+      let attempt = 0;
+      attempt < attempts.length;
+      attempt++
+    ) {
+
+      const settings =
+        attempts[attempt];
+
+
+      this.updateProgress(
+        30 +
+        Math.round(
+          (attempt /
+            attempts.length) *
+          60
+        ),
+        `Compression pass ${attempt + 1} of ${attempts.length}...`
+      );
+
+
+      await yieldToBrowser();
+
+
+      const result =
+        await this.renderPDF(
+          sourceBytes,
+          pageCount,
+          settings
+        );
+
+
+      if (!bestResult ||
+          result.length < bestResult.length) {
+
+        bestResult = result;
+
+      }
+
+
+      /*
+       * We reached the requested target.
+       */
+
+      if (
+        result.length <=
+        targetBytes
+      ) {
+
+        return result;
+
+      }
+
+    }
+
+
+    /*
+     * Return the smallest version we
+     * successfully produced.
+     */
+
+    return bestResult;
+
+  },
+
+
+  /* =======================================================
+     RENDER PDF PAGES
+  ======================================================= */
+
+  async renderPDF(
+    sourceBytes,
+    pageCount,
+    settings
+  ) {
+
+    const pdfjs =
+      window.pdfjsLib;
+
+
+    const loadingTask =
+      pdfjs.getDocument({
+        data: sourceBytes
+      });
+
+
+    const pdf =
+      await loadingTask.promise;
+
+
+    const output =
+      await PDFLib.PDFDocument.create();
+
+
+    /*
+     * Remove metadata where possible.
+     */
+
+    output.setTitle("");
+    output.setAuthor("");
+    output.setSubject("");
+    output.setKeywords([]);
+    output.setProducer("FileShort");
+
+
+    for (
+      let pageNumber = 1;
+      pageNumber <= pageCount;
+      pageNumber++
+    ) {
+
+      const page =
+        await pdf.getPage(
+          pageNumber
+        );
+
+
+      const viewport =
+        page.getViewport({
+          scale: settings.scale
+        });
+
+
+      /*
+       * Keep canvas sizes reasonable.
+       */
+
+      const maxDimension = 2400;
+
+      let width =
+        viewport.width;
+
+      let height =
+        viewport.height;
+
+
+      if (
+        width > maxDimension ||
+        height > maxDimension
+      ) {
+
+        const ratio =
+          Math.min(
+            maxDimension / width,
+            maxDimension / height
+          );
+
+        width *= ratio;
+        height *= ratio;
+
+      }
+
+
+      const canvas =
+        document.createElement(
+          "canvas"
+        );
+
+
+      canvas.width =
+        Math.max(
+          1,
+          Math.round(width)
+        );
+
+      canvas.height =
+        Math.max(
+          1,
+          Math.round(height)
+        );
+
+
+      const context =
+        canvas.getContext(
+          "2d",
+          {
+            alpha: false
+          }
+        );
+
+
+      context.fillStyle =
+        "#ffffff";
+
+      context.fillRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+
+
+      const renderViewport =
+        page.getViewport({
+          scale:
+            canvas.width /
+            viewport.width *
+            settings.scale
+        });
+
+
+      await page.render({
+        canvasContext: context,
+        viewport:
+          renderViewport
+      }).promise;
+
+
+      /*
+       * JPEG is significantly smaller than
+       * embedding full PNG page images.
+       */
+
+      const dataURL =
+        canvas.toDataURL(
+          "image/jpeg",
+          settings.quality
+        );
+
+
+      const image =
+        await output.embedJpg(
+          dataURL
+        );
+
+
+      const pdfPage =
+        output.addPage([
+          canvas.width,
+          canvas.height
+        ]);
+
+
+      pdfPage.drawImage(
+        image,
+        {
+          x: 0,
+          y: 0,
+          width:
+            canvas.width,
+          height:
+            canvas.height
+        }
+      );
+
+
+      /*
+       * Free memory before processing
+       * the next page.
+       */
+
+      canvas.width = 1;
+      canvas.height = 1;
+
+
+      /*
+       * Update progress occasionally.
+       */
+
+      if (
+        pageNumber === 1 ||
+        pageNumber === pageCount ||
+        pageNumber % 3 === 0
+      ) {
+
+        const pageProgress =
+          pageNumber /
+          pageCount;
+
+
+        this.updateProgress(
+          30 +
+          Math.round(
+            pageProgress * 45
+          ),
+          `Processing page ${pageNumber} of ${pageCount}...`
+        );
+
+
+        await yieldToBrowser();
+
+      }
+
+    }
+
+
+    return await output.save({
+      useObjectStreams: true,
+      addDefaultPage: false,
+      updateFieldAppearances: false
+    });
+
+  },
+
+
+  /* =======================================================
+     PROGRESS
+  ======================================================= */
+
+  updateProgress(
+    percent,
+    message
+  ) {
+
+    const safePercent =
+      Math.max(
+        0,
+        Math.min(
+          100,
+          Math.round(percent)
+        )
+      );
+
+
+    const bar =
+      $("progressFill") ||
+      $("pdfProgressBar");
+
+
+    const percentText =
+      $("progressPercent");
+
+
+    const progressText =
+      $("progressText") ||
+      $("pdfProgressText");
+
+
+    if (bar) {
+
+      bar.style.width =
+        `${safePercent}%`;
+
+    }
+
+
+    setText(
+      percentText,
+      `${safePercent}%`
+    );
+
+
+    setText(
+      progressText,
+      message
+    );
+
+  },
+
+
+  /* =======================================================
+     PDF RESULT
+  ======================================================= */
+
+  showResult(
+    blob,
+    targetMB
+  ) {
+
+    if (this.outputURL) {
+
+      URL.revokeObjectURL(
+        this.outputURL
+      );
+
+    }
+
+
+    this.outputURL =
+      URL.createObjectURL(
+        blob
+      );
+
+
+    const originalSize =
+      this.file.size;
+
+    const newSize =
+      blob.size;
+
+
+    const saved =
+      originalSize > 0
+        ? Math.max(
+            0,
+            (1 -
+              newSize /
+              originalSize) *
+              100
+          )
+        : 0;
+
+
+    const result =
+      $("pdfResult");
+
+
+    if (!result) return;
+
+
+    /*
+     * Create result UI if the HTML
+     * result container is empty.
+     */
+
+    result.innerHTML = `
+
+      <div class="result-success">
+
+        <div class="result-icon">
+          ✓
+        </div>
+
+        <div>
+
+          <h3>
+            PDF compression complete
+          </h3>
+
+          <p>
+            Original:
+            <strong>
+              ${formatBytes(originalSize)}
+            </strong>
+          </p>
+
+          <p>
+            New:
+            <strong>
+              ${formatBytes(newSize)}
+            </strong>
+          </p>
+
+          <p>
+            ${
+              saved > 0
+                ? `You saved ${saved.toFixed(1)}%`
+                : "The PDF could not be reduced further."
+            }
+          </p>
+
+          <p>
+            Target:
+            <strong>
+              ${targetMB} MB
+            </strong>
+          </p>
+
+        </div>
+
+      </div>
+
+      <a
+        class="download"
+        href="${this.outputURL}"
+        download="${getOutputName(this.file.name, "pdf")}"
+      >
+        Download compressed PDF →
+      </a>
+
+    `;
+
+
+    hide($("pdfProgress"));
+
+    show(result);
+
+
+    result.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest"
+    });
+
+  },
+
+
+  /* =======================================================
+     ERROR
+  ======================================================= */
+
+  showError(message) {
+
+    const error =
+      $("pdfError");
+
+
+    if (!error) {
+
+      alert(message);
+
+      return;
+
+    }
+
+
+    setText(
+      error,
+      message
+    );
+
+
+    show(error);
+
+  },
+
+
+  getFriendlyPDFError(error) {
+
+    const message =
+      String(
+        error?.message || ""
+      );
+
+
+    if (
+      /password|encrypted/i.test(
+        message
+      )
+    ) {
+
+      return (
+        "This PDF is password protected or encrypted. Please unlock it first."
+      );
+
+    }
+
+
+    if (
+      /memory|allocation|heap/i.test(
+        message
+      )
+    ) {
+
+      return (
+        "This PDF is too large or complex for the browser to process safely. Try a smaller PDF."
+      );
+
+    }
+
+
+    return (
+      "The PDF could not be compressed. The document may contain unsupported or complex content."
+    );
+
+  },
+
+
+  /* =======================================================
+     RESET
+  ======================================================= */
+
+  reset() {
+
+    this.file = null;
+
+
+    if (this.outputURL) {
+
+      URL.revokeObjectURL(
+        this.outputURL
+      );
+
+      this.outputURL = null;
+
+    }
+
+
+    const input =
+      $("pdfInput");
+
+
+    if (input) {
+
+      input.value = "";
+
+    }
+
+
+    hide($("pdfControls"));
+
+    hide($("pdfProgress"));
+
+    hide($("pdfResult"));
+
+    hide($("pdfError"));
+
+  },
+
+
+  /* =======================================================
+     DRAG & DROP
+  ======================================================= */
+
+  setupDragDrop() {
+
+    const zone =
+      $("pdfDrop");
+
+
+    const input =
+      $("pdfInput");
+
+
+    if (!zone) return;
+
+
+    [
+      "dragenter",
+      "dragover"
+    ].forEach(
+      eventName => {
+
+        zone.addEventListener(
+          eventName,
+          event => {
+
+            event.preventDefault();
+
+            zone.classList.add(
+              "drag"
+            );
+
+          }
+        );
+
+      }
+    );
+
+
+    [
+      "dragleave",
+      "drop"
+    ].forEach(
+      eventName => {
+
+        zone.addEventListener(
+          eventName,
+          event => {
+
+            event.preventDefault();
+
+            zone.classList.remove(
+              "drag"
+            );
+
+          }
+        );
+
+      }
+    );
+
+
+    zone.addEventListener(
+      "drop",
+      event => {
+
+        const file =
+          event.dataTransfer
+            ?.files?.[0];
+
+
+        if (file) {
+
+          this.handleFile(file);
+
+        }
+
+      }
+    );
+
+  }
+
+};
+
+
+/* =========================================================
+   05. GLOBAL UPLOAD IMPROVEMENTS
+========================================================= */
+
+
+/**
+ * Make upload cards open their corresponding
+ * file picker reliably.
+ */
+function setupUploadCards() {
+
+  const cards =
+    document.querySelectorAll(
+      ".upload-card"
+    );
+
+
+  cards.forEach(card => {
+
+    const input =
+      card.querySelector(
+        'input[type="file"]'
+      );
+
+
+    if (!input) return;
+
+
+    /*
+     * The label normally handles this,
+     * but this also makes the entire card
+     * reliably clickable.
+     */
+
+    card.addEventListener(
+      "click",
+      event => {
+
+        /*
+         * Don't trigger twice when the
+         * browser is already handling
+         * the label/input interaction.
+         */
+
+        if (
+          event.target === input
+        ) {
+
+          return;
+
+        }
+
+      }
+    );
+
+
+    input.addEventListener(
+      "click",
+      event => {
+
+        event.stopPropagation();
+
+      }
+    );
 
   });
 
 }
 
 
-/* ---------------------------------------------------------
-   PDF TARGET-SIZE ENGINE
---------------------------------------------------------- */
+/* =========================================================
+   06. PAGE INITIALIZATION
+========================================================= */
 
-async function compressPdfToTarget(
-  file,
-  targetBytes
-) {
+function initializeFileShort() {
 
-  setPdfProgress(
-    2,
-    "Loading PDF..."
+  console.log(
+    "FileShort initialized."
   );
-
-
-  const pdfLibrary = window.PDFLib;
-
-
-  if (!pdfLibrary) {
-
-    throw new Error(
-      "PDF compression library could not be loaded. Please refresh the page and try again."
-    );
-
-  }
-
-
-  const pdfjsLib =
-    await loadPdfJs();
-
-
-  const arrayBuffer =
-    await file.arrayBuffer();
-
-
-  const sourcePdf =
-    await pdfjsLib.getDocument({
-      data: new Uint8Array(arrayBuffer)
-    }).promise;
-
-
-  const pageCount =
-    sourcePdf.numPages;
-
-
-  if (!pageCount) {
-
-    throw new Error(
-      "This PDF does not contain any pages."
-    );
-
-  }
 
 
   /*
-     First attempt:
-     Render pages at a reasonable resolution
-     and progressively reduce JPEG quality.
-  */
+   * Initialize image compressor.
+   */
 
-  const attempts = [
-
-    {
-      scale: 1.35,
-      quality: 0.82
-    },
-
-    {
-      scale: 1.20,
-      quality: 0.72
-    },
-
-    {
-      scale: 1.05,
-      quality: 0.62
-    },
-
-    {
-      scale: 0.90,
-      quality: 0.52
-    },
-
-    {
-      scale: 0.78,
-      quality: 0.43
-    },
-
-    {
-      scale: 0.65,
-      quality: 0.34
-    },
-
-    {
-      scale: 0.55,
-      quality: 0.25
-    }
-
-  ];
-
-
-  let bestBlob = null;
-
-
-  for (
-    let attemptIndex = 0;
-    attemptIndex < attempts.length;
-    attemptIndex++
-  ) {
-
-    const attempt =
-      attempts[attemptIndex];
-
-
-    setPdfProgress(
-      Math.round(
-        5 +
-        (attemptIndex / attempts.length) * 20
-      ),
-      `Trying compression level ${attemptIndex + 1}...`
-    );
-
-
-    const blob =
-      await renderPdfAsImages(
-        sourcePdf,
-        pdfLibrary,
-        attempt.scale,
-        attempt.quality,
-        (page, total) => {
-
-          const base =
-            10 +
-            (attemptIndex / attempts.length) * 20;
-
-          const progress =
-            base +
-            (page / total) *
-            (25 / attempts.length);
-
-          setPdfProgress(
-            Math.min(95, Math.round(progress)),
-            `Processing page ${page} of ${total}...`
-          );
-
-        }
-      );
-
-
-    if (!bestBlob || blob.size < bestBlob.size) {
-      bestBlob = blob;
-    }
-
-
-    /*
-       If we are already under the target,
-       stop immediately.
-    */
-
-    if (blob.size <= targetBytes) {
-
-      setPdfProgress(
-        100,
-        "Target size reached."
-      );
-
-      return {
-        blob,
-        pageCount
-      };
-
-    }
-
-  }
+  ImageCompressor.init();
 
 
   /*
-     If the requested target is extremely small,
-     the PDF may not be able to reach it while
-     keeping all pages.
-  */
+   * Initialize PDF compressor.
+   */
 
-  if (bestBlob) {
-
-    const targetMB =
-      targetBytes / (1024 * 1024);
-
-
-    throw new Error(
-      `The smallest safe result was ${formatBytes(bestBlob.size)}, which is larger than your ${targetMB.toFixed(1)} MB target. Try a larger target size.`
-    );
-
-  }
-
-
-  throw new Error(
-    "Could not create a compressed PDF."
-  );
-
-}
-
-
-/* ---------------------------------------------------------
-   RENDER PDF PAGES INTO A NEW PDF
---------------------------------------------------------- */
-
-async function renderPdfAsImages(
-  sourcePdf,
-  pdfLibrary,
-  scale,
-  jpegQuality,
-  onPageProgress
-) {
-
-  const {
-    PDFDocument
-  } = pdfLibrary;
-
-
-  const newPdf =
-    await PDFDocument.create();
+  PDFCompressor.init();
 
 
   /*
-     Process one page at a time.
+   * Upload card behavior.
+   */
 
-     This is important for mobile devices because
-     keeping every canvas in memory at once can
-     crash the browser on large PDFs.
-  */
-
-  for (
-    let pageNumber = 1;
-    pageNumber <= sourcePdf.numPages;
-    pageNumber++
-  ) {
-
-    const page =
-      await sourcePdf.getPage(
-        pageNumber
-      );
-
-
-    const viewport =
-      page.getViewport({
-        scale
-      });
-
-
-    const canvas =
-      document.createElement("canvas");
-
-
-    canvas.width =
-      Math.max(
-        1,
-        Math.floor(viewport.width)
-      );
-
-
-    canvas.height =
-      Math.max(
-        1,
-        Math.floor(viewport.height)
-      );
-
-
-    const context =
-      canvas.getContext("2d", {
-        alpha: false
-      });
-
-
-    /*
-       White background prevents transparent
-       areas from becoming black in JPEG.
-    */
-
-    context.fillStyle = "#ffffff";
-
-    context.fillRect(
-      0,
-      0,
-      canvas.width,
-      canvas.height
-    );
-
-
-    await page.render({
-      canvasContext: context,
-      viewport
-    }).promise;
-
-
-    const jpegBlob =
-      await canvasToJpeg(
-        canvas,
-        jpegQuality
-      );
-
-
-    const jpegBytes =
-      new Uint8Array(
-        await jpegBlob.arrayBuffer()
-      );
-
-
-    const image =
-      await newPdf.embedJpg(
-        jpegBytes
-      );
-
-
-    const outputPage =
-      newPdf.addPage([
-        viewport.width,
-        viewport.height
-      ]);
-
-
-    outputPage.drawImage(
-      image,
-      {
-        x: 0,
-        y: 0,
-        width: viewport.width,
-        height: viewport.height
-      }
-    );
-
-
-    /*
-       Release canvas memory immediately.
-    */
-
-    canvas.width = 1;
-    canvas.height = 1;
-
-
-    if (typeof onPageProgress === "function") {
-
-      onPageProgress(
-        pageNumber,
-        sourcePdf.numPages
-      );
-
-    }
-
-
-    /*
-       Allow Android/browser UI to breathe
-       between pages.
-    */
-
-    await nextFrame();
-
-  }
-
-
-  const bytes =
-    await newPdf.save({
-      useObjectStreams: true,
-      addDefaultPage: false
-    });
-
-
-  return new Blob(
-    [bytes],
-    {
-      type: "application/pdf"
-    }
-  );
+  setupUploadCards();
 
 }
 
 
-/* ---------------------------------------------------------
-   CANVAS → JPEG
---------------------------------------------------------- */
+/* =========================================================
+   07. START APPLICATION
+========================================================= */
 
-function canvasToJpeg(
-  canvas,
-  quality
+if (
+  document.readyState ===
+  "loading"
 ) {
 
-  return new Promise(
-    (resolve, reject) => {
-
-      canvas.toBlob(
-        (blob) => {
-
-          if (blob) {
-            resolve(blob);
-          } else {
-            reject(
-              new Error(
-                "Could not create JPEG image."
-              )
-            );
-          }
-
-        },
-        "image/jpeg",
-        quality
-      );
-
-    }
+  document.addEventListener(
+    "DOMContentLoaded",
+    initializeFileShort
   );
 
-}
+} else {
 
-
-/* ---------------------------------------------------------
-   PROGRESS
---------------------------------------------------------- */
-
-function setPdfProgress(
-  percentage,
-  text
-) {
-
-  const value =
-    Math.max(
-      0,
-      Math.min(
-        100,
-        percentage
-      )
-    );
-
-
-  if (pdfProgressBar) {
-
-    pdfProgressBar.style.width =
-      `${value}%`;
-
-  }
-
-
-  if (pdfProgressText) {
-
-    pdfProgressText.textContent =
-      text;
-
-  }
+  initializeFileShort();
 
 }
-
-
-/* ---------------------------------------------------------
-   PDF ERROR
---------------------------------------------------------- */
-
-function showPdfError(message) {
-
-  if (!pdfError) {
-
-    alert(message);
-
-    return;
-
-  }
-
-
-  pdfError.textContent =
-    message;
-
-  show(pdfError);
-
-}
-
-
-/* ---------------------------------------------------------
-   PDF FILE NAME
---------------------------------------------------------- */
-
-function getCompressedPdfName(
-  filename
-) {
-
-  const base =
-    filename.replace(
-      /\.pdf$/i,
-      ""
-    );
-
-
-  return `${base}-compressed.pdf`;
-
-}
-
-
-/* ---------------------------------------------------------
-   NEXT FRAME
---------------------------------------------------------- */
-
-function nextFrame() {
-
-  return new Promise(
-    (resolve) => {
-
-      requestAnimationFrame(
-        () => resolve()
-      );
-
-    }
-  );
-
-}
-
-
-/* ---------------------------------------------------------
-   CLEANUP
---------------------------------------------------------- */
-
-window.addEventListener(
-  "beforeunload",
-  () => {
-
-    if (imageObjectUrl) {
-      URL.revokeObjectURL(
-        imageObjectUrl
-      );
-    }
-
-
-    if (downloadImage?.dataset.url) {
-
-      URL.revokeObjectURL(
-        downloadImage.dataset.url
-      );
-
-    }
-
-
-    if (downloadPdf?.dataset.url) {
-
-      URL.revokeObjectURL(
-        downloadPdf.dataset.url
-      );
-
-    }
-
-  }
-);
-
-
-/* ---------------------------------------------------------
-   STARTUP TEST
---------------------------------------------------------- */
-
-console.log(
-  "FileShort app.js loaded successfully."
-);
