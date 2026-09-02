@@ -179,7 +179,13 @@ setupInput(
   "#pdfDrop",
   file => {
 
-    if (file.type !== "application/pdf") {
+    // Android browsers may return an empty or different MIME type.
+    // Check both MIME type and file extension.
+    const isPDF =
+      file.type === "application/pdf" ||
+      file.name.toLowerCase().endsWith(".pdf");
+
+    if (!isPDF) {
       alert("Please choose a PDF file.");
       return;
     }
@@ -191,6 +197,9 @@ setupInput(
 
     $("#pdfControls").classList.remove("hidden");
     $("#pdfResult").classList.add("hidden");
+
+    // Make sure the selected file is visible immediately.
+    console.log("PDF selected:", file.name, file.size, file.type);
   }
 );
 
