@@ -145,6 +145,37 @@
     </section>
 
 
+    <!-- =======================================================
+         DAILY INSPIRATION
+         EASY TO UPDATE: CHANGE ONLY THE QUOTE AND MESSAGE BELOW
+         ======================================================= -->
+
+    <section class="daily-content" id="daily-content">
+
+      <div class="daily-grid">
+
+        <article class="daily-quote-card">
+          <div class="daily-card-top">
+            <span class="section-label">✦ QUOTE OF THE DAY</span>
+            <span class="daily-date" id="dailyDate">TODAY</span>
+          </div>
+          <blockquote>“Small steps every day create big changes.”</blockquote>
+          <p class="quote-author">— FileShort</p>
+        </article>
+
+        <article class="developer-card">
+          <div class="daily-card-top">
+            <span class="section-label">💬 FROM THE DEVELOPER</span>
+          </div>
+          <p class="developer-message">FileShort is built to make everyday file work simple, fast and private. Choose your file, get the job done, and keep moving forward.</p>
+          <div class="developer-signature"><span class="developer-dot"></span>Built with care by the FileShort team</div>
+        </article>
+
+      </div>
+
+    </section>
+
+
 
     <!-- =======================================================
          TOOLS SECTION
@@ -1038,6 +1069,15 @@
   <!-- =========================================================
        APPLICATION JAVASCRIPT
        ========================================================= -->
+
+  <script>
+    /* DAILY CONTENT DATE — UI ONLY */
+    (function () {
+      const dateEl = document.getElementById("dailyDate");
+      if (!dateEl) return;
+      dateEl.textContent = new Date().toLocaleDateString("en-IN", {day:"numeric", month:"short", year:"numeric"}).toUpperCase();
+    })();
+  </script>
 
   <script src="app.js"></script>
 
