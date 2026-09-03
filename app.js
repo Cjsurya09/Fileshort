@@ -2890,3 +2890,1212 @@ console.log(
   pdfTargetMB,
   "MB"
 );
+
+/* =========================================================
+   FEATURE 03 — IMAGE RESIZER
+   ---------------------------------------------------------
+   Independent feature module.
+
+   Existing image compression code is NOT modified.
+
+   Supports:
+   - JPG / JPEG
+   - PNG
+   - WebP
+   - Width
+   - Height
+   - Aspect-ratio lock
+   - 25 / 50 / 75 / 100% presets
+   - Output format
+   - Local browser processing
+   ========================================================= */
+
+
+(function initImageResizer() {
+
+  "use strict";
+
+
+  /* =======================================================
+     03.01 — ELEMENTS
+     ======================================================= */
+
+  const resizeInput =
+    document.getElementById("resizeInput");
+
+  const resizeDrop =
+    document.getElementById("resizeDrop");
+
+  const resizeControls =
+    document.getElementById("resizeControls");
+
+  const resizeResult =
+    document.getElementById("resizeResult");
+
+  const resizeError =
+    document.getElementById("resizeError");
+
+  const resizeName =
+    document.getElementById("resizeName");
+
+  const resizeOriginal =
+    document.getElementById("resizeOriginal");
+
+  const resizeOriginalDimensions =
+    document.getElementById(
+      "resizeOriginalDimensions"
+    );
+
+  const resizeWidth =
+    document.getElementById("resizeWidth");
+
+  const resizeHeight =
+    document.getElementById("resizeHeight");
+
+  const resizeLock =
+    document.getElementById("resizeLock");
+
+  const resizeFormat =
+    document.getElementById("resizeFormat");
+
+  const resizeButton =
+    document.getElementById("resizeImage");
+
+  const resizeReset =
+    document.getElementById("resizeReset");
+
+  const resizePresets =
+    document.querySelectorAll(
+      ".resize-preset"
+    );
+
+
+  /* =======================================================
+     03.02 — STATE
+     ======================================================= */
+
+  let currentFile = null;
+
+  let currentImage = null;
+
+  let originalWidth = 0;
+
+  let originalHeight = 0;
+
+  let downloadUrl = null;
+
+  let updatingDimensions = false;
+
+
+  /* =======================================================
+     03.03 — HELPERS
+     ======================================================= */
+
+  function showElement(element) {
+
+    if (!element) {
+      return;
+    }
+
+    element.classList.remove(
+      "hidden"
+    );
+
+  }
+
+
+  function hideElement(element) {
+
+    if (!element) {
+      return;
+    }
+
+    element.classList.add(
+      "hidden"
+    );
+
+  }
+
+
+  function formatResizeBytes(bytes) {
+
+    if (
+      !Number.isFinite(bytes)
+    ) {
+      return "—";
+    }
+
+
+    if (bytes < 1024) {
+
+      return `${Math.round(bytes)} B`;
+
+    }
+
+
+    if (bytes < 1024 * 1024) {
+
+      return `${(
+        bytes / 1024
+      ).toFixed(1)} KB`;
+
+    }
+
+
+    return `${(
+      bytes /
+      (1024 * 1024)
+    ).toFixed(2)} MB`;
+
+  }
+
+
+  function revokeResizeUrl() {
+
+    if (downloadUrl) {
+
+      URL.revokeObjectURL(
+        downloadUrl
+      );
+
+      downloadUrl = null;
+
+    }
+
+  }
+
+
+  function showResizeError(
+    message
+  ) {
+
+    if (!resizeError) {
+      return;
+    }
+
+
+    resizeError.textContent =
+      message;
+
+
+    showElement(
+      resizeError
+    );
+
+  }
+
+
+  function clearResizeError() {
+
+    if (!resizeError) {
+      return;
+    }
+
+
+    resizeError.textContent =
+      "";
+
+
+    hideElement(
+      resizeError
+    );
+
+  }
+
+
+  /* =======================================================
+     03.04 — LOAD IMAGE
+     ======================================================= */
+
+  function loadResizeImage(
+    file
+  ) {
+
+    return new Promise(
+      (
+        resolve,
+        reject
+      ) => {
+
+        const url =
+          URL.createObjectURL(
+            file
+          );
+
+
+        const image =
+          new Image();
+
+
+        image.onload =
+          () => {
+
+            URL.revokeObjectURL(
+              url
+            );
+
+
+            resolve(
+              image
+            );
+
+          };
+
+
+        image.onerror =
+          () => {
+
+            URL.revokeObjectURL(
+              url
+            );
+
+
+            reject(
+              new Error(
+                "Unable to read image."
+              )
+            );
+
+          };
+
+
+        image.src =
+          url;
+
+      }
+    );
+
+  }
+
+
+  /* =======================================================
+     03.05 — HANDLE FILE
+     ======================================================= */
+
+  async function handleResizeFile(
+    file
+  ) {
+
+    clearResizeError();
+
+
+    if (!file) {
+      return;
+    }
+
+
+    if (
+      ![
+        "image/jpeg",
+        "image/png",
+        "image/webp"
+      ].includes(
+        file.type
+      )
+    ) {
+
+      showResizeError(
+        "Please choose a JPG, PNG or WebP image."
+      );
+
+      return;
+
+    }
+
+
+    try {
+
+      const image =
+        await loadResizeImage(
+          file
+        );
+
+
+      currentFile =
+        file;
+
+
+      currentImage =
+        image;
+
+
+      originalWidth =
+        image.naturalWidth;
+
+
+      originalHeight =
+        image.naturalHeight;
+
+
+      resizeName.textContent =
+        file.name;
+
+
+      resizeOriginal.textContent =
+        formatResizeBytes(
+          file.size
+        );
+
+
+      resizeOriginalDimensions.textContent =
+        `${originalWidth} × ${originalHeight}px`;
+
+
+      resizeWidth.value =
+        originalWidth;
+
+
+      resizeHeight.value =
+        originalHeight;
+
+
+      resizeFormat.value =
+        file.type === "image/png"
+          ? "image/png"
+          : file.type === "image/webp"
+            ? "image/webp"
+            : "image/jpeg";
+
+
+      resizeLock.checked =
+        true;
+
+
+      resizePresets.forEach(
+        button => {
+
+          button.classList.remove(
+            "active"
+          );
+
+          if (
+            button.dataset.scale ===
+            "1"
+          ) {
+
+            button.classList.add(
+              "active"
+            );
+
+          }
+
+        }
+      );
+
+
+      hideElement(
+        resizeDrop
+      );
+
+
+      showElement(
+        resizeControls
+      );
+
+
+      hideElement(
+        resizeResult
+      );
+
+
+    } catch (error) {
+
+      console.error(
+        "Image resize load error:",
+        error
+      );
+
+
+      showResizeError(
+        "This image could not be opened. Please try another image."
+      );
+
+    }
+
+  }
+
+
+  /* =======================================================
+     03.06 — FILE INPUT
+     ======================================================= */
+
+  if (resizeInput) {
+
+    resizeInput.addEventListener(
+      "change",
+      event => {
+
+        const file =
+          event.target.files?.[0];
+
+
+        handleResizeFile(
+          file
+        );
+
+      }
+    );
+
+  }
+
+
+  /* =======================================================
+     03.07 — DRAG & DROP
+     ======================================================= */
+
+  if (resizeDrop) {
+
+    resizeDrop.addEventListener(
+      "dragover",
+      event => {
+
+        event.preventDefault();
+
+        resizeDrop.classList.add(
+          "dragover"
+        );
+
+      }
+    );
+
+
+    resizeDrop.addEventListener(
+      "dragleave",
+      () => {
+
+        resizeDrop.classList.remove(
+          "dragover"
+        );
+
+      }
+    );
+
+
+    resizeDrop.addEventListener(
+      "drop",
+      event => {
+
+        event.preventDefault();
+
+
+        resizeDrop.classList.remove(
+          "dragover"
+        );
+
+
+        const file =
+          event.dataTransfer
+            ?.files?.[0];
+
+
+        handleResizeFile(
+          file
+        );
+
+      }
+    );
+
+  }
+
+
+  /* =======================================================
+     03.08 — WIDTH → HEIGHT
+     ======================================================= */
+
+  if (resizeWidth) {
+
+    resizeWidth.addEventListener(
+      "input",
+      () => {
+
+        if (
+          !resizeLock.checked ||
+          !currentImage ||
+          updatingDimensions
+        ) {
+          return;
+        }
+
+
+        const width =
+          Number(
+            resizeWidth.value
+          );
+
+
+        if (
+          !Number.isFinite(width) ||
+          width <= 0
+        ) {
+          return;
+        }
+
+
+        const ratio =
+          originalHeight /
+          originalWidth;
+
+
+        updatingDimensions =
+          true;
+
+
+        resizeHeight.value =
+          Math.max(
+            1,
+            Math.round(
+              width * ratio
+            )
+          );
+
+
+        updatingDimensions =
+          false;
+
+      }
+    );
+
+  }
+
+
+  /* =======================================================
+     03.09 — HEIGHT → WIDTH
+     ======================================================= */
+
+  if (resizeHeight) {
+
+    resizeHeight.addEventListener(
+      "input",
+      () => {
+
+        if (
+          !resizeLock.checked ||
+          !currentImage ||
+          updatingDimensions
+        ) {
+          return;
+        }
+
+
+        const height =
+          Number(
+            resizeHeight.value
+          );
+
+
+        if (
+          !Number.isFinite(height) ||
+          height <= 0
+        ) {
+          return;
+        }
+
+
+        const ratio =
+          originalWidth /
+          originalHeight;
+
+
+        updatingDimensions =
+          true;
+
+
+        resizeWidth.value =
+          Math.max(
+            1,
+            Math.round(
+              height * ratio
+            )
+          );
+
+
+        updatingDimensions =
+          false;
+
+      }
+    );
+
+  }
+
+
+  /* =======================================================
+     03.10 — QUICK PRESETS
+     ======================================================= */
+
+  resizePresets.forEach(
+    button => {
+
+      button.addEventListener(
+        "click",
+        () => {
+
+          if (
+            !currentImage
+          ) {
+            return;
+          }
+
+
+          const scale =
+            Number(
+              button.dataset.scale
+            );
+
+
+          if (
+            !Number.isFinite(scale) ||
+            scale <= 0
+          ) {
+            return;
+          }
+
+
+          const width =
+            Math.max(
+              1,
+              Math.round(
+                originalWidth *
+                scale
+              )
+            );
+
+
+          const height =
+            Math.max(
+              1,
+              Math.round(
+                originalHeight *
+                scale
+              )
+            );
+
+
+          updatingDimensions =
+            true;
+
+
+          resizeWidth.value =
+            width;
+
+
+          resizeHeight.value =
+            height;
+
+
+          updatingDimensions =
+            false;
+
+
+          resizePresets.forEach(
+            item => {
+
+              item.classList.remove(
+                "active"
+              );
+
+            }
+          );
+
+
+          button.classList.add(
+            "active"
+          );
+
+        }
+      );
+
+    }
+  );
+
+
+  /* =======================================================
+     03.11 — CANVAS RESIZE ENGINE
+     ======================================================= */
+
+  function resizeImageToBlob(
+    image,
+    width,
+    height,
+    type
+  ) {
+
+    return new Promise(
+      (
+        resolve,
+        reject
+      ) => {
+
+        const canvas =
+          document.createElement(
+            "canvas"
+          );
+
+
+        canvas.width =
+          width;
+
+
+        canvas.height =
+          height;
+
+
+        const context =
+          canvas.getContext(
+            "2d"
+          );
+
+
+        if (!context) {
+
+          reject(
+            new Error(
+              "Canvas is not supported by this browser."
+            )
+          );
+
+          return;
+
+        }
+
+
+        context.imageSmoothingEnabled =
+          true;
+
+
+        context.imageSmoothingQuality =
+          "high";
+
+
+        /*
+         * White background for JPG.
+         * PNG/WebP preserve transparency.
+         */
+
+        if (
+          type ===
+          "image/jpeg"
+        ) {
+
+          context.fillStyle =
+            "#ffffff";
+
+
+          context.fillRect(
+            0,
+            0,
+            width,
+            height
+          );
+
+        }
+
+
+        context.drawImage(
+          image,
+          0,
+          0,
+          width,
+          height
+        );
+
+
+        const quality =
+          type ===
+          "image/png"
+            ? undefined
+            : 0.90;
+
+
+        canvas.toBlob(
+          blob => {
+
+            if (!blob) {
+
+              reject(
+                new Error(
+                  "Unable to create the resized image."
+                )
+              );
+
+              return;
+
+            }
+
+
+            resolve(
+              blob
+            );
+
+          },
+          type,
+          quality
+        );
+
+      }
+    );
+
+  }
+
+
+  /* =======================================================
+     03.12 — RESIZE IMAGE
+     ======================================================= */
+
+  if (resizeButton) {
+
+    resizeButton.addEventListener(
+      "click",
+      async () => {
+
+        clearResizeError();
+
+
+        if (
+          !currentImage ||
+          !currentFile
+        ) {
+
+          showResizeError(
+            "Please choose an image first."
+          );
+
+          return;
+
+        }
+
+
+        const width =
+          Math.round(
+            Number(
+              resizeWidth.value
+            )
+          );
+
+
+        const height =
+          Math.round(
+            Number(
+              resizeHeight.value
+            )
+          );
+
+
+        if (
+          !Number.isFinite(width) ||
+          !Number.isFinite(height) ||
+          width < 1 ||
+          height < 1
+        ) {
+
+          showResizeError(
+            "Please enter valid width and height values."
+          );
+
+          return;
+
+        }
+
+
+        const maxDimension =
+          10000;
+
+
+        if (
+          width > maxDimension ||
+          height > maxDimension
+        ) {
+
+          showResizeError(
+            "Maximum supported dimension is 10,000 pixels."
+          );
+
+          return;
+
+        }
+
+
+        const originalText =
+          resizeButton.textContent;
+
+
+        resizeButton.disabled =
+          true;
+
+
+        resizeButton.textContent =
+          "Resizing...";
+
+
+        try {
+
+          const outputType =
+            resizeFormat.value;
+
+
+          const blob =
+            await resizeImageToBlob(
+              currentImage,
+              width,
+              height,
+              outputType
+            );
+
+
+          showResizeResult(
+            blob,
+            width,
+            height,
+            outputType
+          );
+
+
+        } catch (error) {
+
+          console.error(
+            "Image resize error:",
+            error
+          );
+
+
+          showResizeError(
+            "Image resizing failed. Please try another image."
+          );
+
+        } finally {
+
+          resizeButton.disabled =
+            false;
+
+
+          resizeButton.textContent =
+            originalText ||
+            "Resize Image";
+
+        }
+
+      }
+    );
+
+  }
+
+
+  /* =======================================================
+     03.13 — RESULT
+     ======================================================= */
+
+  function showResizeResult(
+    blob,
+    width,
+    height,
+    type
+  ) {
+
+    revokeResizeUrl();
+
+
+    downloadUrl =
+      URL.createObjectURL(
+        blob
+      );
+
+
+    const extension =
+      type === "image/png"
+        ? "png"
+        : type === "image/webp"
+          ? "webp"
+          : "jpg";
+
+
+    const baseName =
+      currentFile.name.replace(
+        /\.[^/.]+$/,
+        ""
+      );
+
+
+    const downloadName =
+      `${baseName}-resized.${extension}`;
+
+
+    resizeResult.innerHTML = `
+
+      <div class="result-success">
+
+        <div class="result-icon">
+          ✓
+        </div>
+
+
+        <div class="result-content">
+
+          <h3>
+            Image resize complete
+          </h3>
+
+
+          <div class="result-stats">
+
+
+            <div>
+
+              <span>
+                Original
+              </span>
+
+              <strong>
+                ${originalWidth} × ${originalHeight}px
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                New dimensions
+              </span>
+
+              <strong>
+                ${width} × ${height}px
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                New size
+              </span>
+
+              <strong>
+                ${formatResizeBytes(blob.size)}
+              </strong>
+
+            </div>
+
+
+          </div>
+
+
+          <p>
+            ${formatResizeBytes(currentFile.size)}
+            → 
+            ${formatResizeBytes(blob.size)}
+          </p>
+
+
+          <a
+            class="download"
+            href="${downloadUrl}"
+            download="${downloadName}">
+
+            ↓ Download resized image
+
+          </a>
+
+
+        </div>
+
+      </div>
+
+    `;
+
+
+    showElement(
+      resizeResult
+    );
+
+
+    resizeResult.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest"
+    });
+
+  }
+
+
+  /* =======================================================
+     03.14 — RESET
+     ======================================================= */
+
+  if (resizeReset) {
+
+    resizeReset.addEventListener(
+      "click",
+      () => {
+
+        currentFile =
+          null;
+
+
+        currentImage =
+          null;
+
+
+        originalWidth =
+          0;
+
+
+        originalHeight =
+          0;
+
+
+        revokeResizeUrl();
+
+
+        clearResizeError();
+
+
+        hideElement(
+          resizeControls
+        );
+
+
+        hideElement(
+          resizeResult
+        );
+
+
+        showElement(
+          resizeDrop
+        );
+
+
+        if (resizeInput) {
+
+          resizeInput.value =
+            "";
+
+        }
+
+      }
+    );
+
+  }
+
+
+  /* =======================================================
+     03.15 — CLEANUP
+     ======================================================= */
+
+  window.addEventListener(
+    "beforeunload",
+    () => {
+
+      revokeResizeUrl();
+
+    }
+  );
+
+
+  /* =======================================================
+     03.16 — READY
+     ======================================================= */
+
+  console.log(
+    "FileShort — Image Resizer loaded."
+  );
+
+})();
